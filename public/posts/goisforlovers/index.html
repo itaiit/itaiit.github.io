@@ -14,7 +14,7 @@ This document is a brief primer on using Go templates. The Go docs provide more 
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/posts/goisforlovers/">
-  <meta property="og:site_name" content="My New Hugo Site">
+  <meta property="og:site_name" content="itaiit’s site">
   <meta property="og:title" content="(Hu)go Template Primer">
   <meta property="og:description" content="Hugo uses the excellent Go html/template library for its template engine. It is an extremely lightweight engine that provides a very small amount of logic. In our experience that it is just the right amount of logic to be able to create a good static website. If you have used other template systems from different languages or frameworks you will find a lot of similarities in Go templates.
 This document is a brief primer on using Go templates. The Go docs provide more details.">
@@ -38,7 +38,7 @@ This document is a brief primer on using Go templates. The Go docs provide more 
   <meta itemprop="wordCount" content="1483">
   <meta itemprop="keywords" content="Go,Golang,Templates,Themes,Development">
 
-<title>(Hu)go Template Primer | My New Hugo Site</title>
+<title>(Hu)go Template Primer | itaiit’s site</title>
 <link rel="icon" href="/favicon.png" >
 <link rel="manifest" href="/manifest.json">
 <link rel="canonical" href="http://localhost:1313/posts/goisforlovers/">
@@ -46,7 +46,9 @@ This document is a brief primer on using Go templates. The Go docs provide more 
 
 
   <script defer src="/fuse.min.js"></script>
-  <script defer src="/en.search.min.a276e8ccac324f83201dfbc316acb2c37dbb71b1b834b9840807e6634fc6f803.js" integrity="sha256-onbozKwyT4MgHfvDFqyyw327cbG4NLmECAfmY0/G&#43;AM=" crossorigin="anonymous"></script>
+  <script defer src="/en.search.min.7fa39019c504459d7c56063129f58e7dadde1c008885bf966f5bf4aca877f72f.js" integrity="sha256-f6OQGcUERZ18VgYxKfWOfa3eHACIhb&#43;Wb1v0rKh39y8=" crossorigin="anonymous"></script>
+
+  <script defer src="/sw.min.6f6f90fcb8eb1c49ec389838e6b801d0de19430b8e516902f8d75c3c8bd98739.js" integrity="sha256-b2&#43;Q/LjrHEnsOJg45rgB0N4ZQwuOUWkC&#43;NdcPIvZhzk=" crossorigin="anonymous"></script>
 
 
 
@@ -62,7 +64,7 @@ This document is a brief primer on using Go templates. The Go docs provide more 
     
   <nav>
 <h2 class="book-brand">
-  <a class="flex align-center" href="/"><span>My New Hugo Site</span>
+  <a class="flex align-center" href="/"><span>itaiit’s site</span>
   </a>
 </h2>
 
@@ -105,6 +107,43 @@ This document is a brief primer on using Go templates. The Go docs provide more 
 
           
   <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-653911d2f51c8df012e3192a0fb85252" class="toggle"  />
+    <label for="section-653911d2f51c8df012e3192a0fb85252" class="flex">
+      <a role="button" class="">
+        Spring Boot</a>
+      <img src="/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/" class="">
+      spring boot 对于Aop 的解析原理和@Transactional注解解析原理</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
     
       
         <li>
@@ -477,24 +516,29 @@ This document is a brief primer on using Go templates. The Go docs provide more 
   
 <nav id="TableOfContents">
   <ul>
-    <li><a href="#introduction-to-go-templates">Introduction to Go Templates</a></li>
-    <li><a href="#basic-syntax">Basic Syntax</a></li>
-    <li><a href="#variables">Variables</a></li>
-    <li><a href="#functions">Functions</a></li>
-    <li><a href="#includes">Includes</a></li>
-    <li><a href="#logic">Logic</a>
+    <li>
       <ul>
-        <li><a href="#iteration">Iteration</a></li>
-        <li><a href="#conditionals">Conditionals</a></li>
+        <li><a href="#introduction-to-go-templates">Introduction to Go Templates</a></li>
+        <li><a href="#basic-syntax">Basic Syntax</a></li>
+        <li><a href="#variables">Variables</a></li>
+        <li><a href="#functions">Functions</a></li>
+        <li><a href="#includes">Includes</a></li>
+        <li><a href="#logic">Logic</a>
+          <ul>
+            <li><a href="#iteration">Iteration</a></li>
+            <li><a href="#conditionals">Conditionals</a></li>
+          </ul>
+        </li>
+        <li><a href="#pipes">Pipes</a></li>
+        <li><a href="#context-aka-the-dot">Context (aka. the dot)</a></li>
       </ul>
     </li>
-    <li><a href="#pipes">Pipes</a></li>
-    <li><a href="#context-aka-the-dot">Context (aka. the dot)</a></li>
-  </ul>
-
-  <ul>
-    <li><a href="#using-content-page-parameters">Using Content (page) Parameters</a></li>
-    <li><a href="#using-site-config-parameters">Using Site (config) Parameters</a></li>
+    <li><a href="#hugo-parameters">Hugo Parameters</a>
+      <ul>
+        <li><a href="#using-content-page-parameters">Using Content (page) Parameters</a></li>
+        <li><a href="#using-site-config-parameters">Using Site (config) Parameters</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
 
@@ -743,10 +787,10 @@ notoc: true
 <p>In your top-level configuration file (eg, <code>config.yaml</code>) you can define site
 parameters, which are values which will be available to you in chrome.</p>
 <p>For instance, you might declare:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">params</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#f92672">CopyrightHTML</span>: <span style="color:#e6db74">&#34;Copyright &amp;#xA9; 2013 John Doe. All Rights Reserved.&#34;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#f92672">TwitterUser</span>: <span style="color:#e6db74">&#34;spf13&#34;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#f92672">SidebarRecentLimit</span>: <span style="color:#ae81ff">5</span></span></span></code></pre></div><p>Within a footer layout, you might then declare a <code>&lt;footer&gt;</code> which is only
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff6ac1">params</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">CopyrightHTML</span>: <span style="color:#5af78e">&#34;Copyright &amp;#xA9; 2013 John Doe. All Rights Reserved.&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">TwitterUser</span>: <span style="color:#5af78e">&#34;spf13&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">SidebarRecentLimit</span>: <span style="color:#ff9f43">5</span></span></span></code></pre></div><p>Within a footer layout, you might then declare a <code>&lt;footer&gt;</code> which is only
 provided if the <code>CopyrightHTML</code> parameter is provided, and if it is given,
 you would declare it to be HTML-safe, so that the HTML entity is not escaped
 again.  This would let you easily update just your top-level config file each
@@ -823,24 +867,29 @@ so, such as in this example:</p>
   
 <nav id="TableOfContents">
   <ul>
-    <li><a href="#introduction-to-go-templates">Introduction to Go Templates</a></li>
-    <li><a href="#basic-syntax">Basic Syntax</a></li>
-    <li><a href="#variables">Variables</a></li>
-    <li><a href="#functions">Functions</a></li>
-    <li><a href="#includes">Includes</a></li>
-    <li><a href="#logic">Logic</a>
+    <li>
       <ul>
-        <li><a href="#iteration">Iteration</a></li>
-        <li><a href="#conditionals">Conditionals</a></li>
+        <li><a href="#introduction-to-go-templates">Introduction to Go Templates</a></li>
+        <li><a href="#basic-syntax">Basic Syntax</a></li>
+        <li><a href="#variables">Variables</a></li>
+        <li><a href="#functions">Functions</a></li>
+        <li><a href="#includes">Includes</a></li>
+        <li><a href="#logic">Logic</a>
+          <ul>
+            <li><a href="#iteration">Iteration</a></li>
+            <li><a href="#conditionals">Conditionals</a></li>
+          </ul>
+        </li>
+        <li><a href="#pipes">Pipes</a></li>
+        <li><a href="#context-aka-the-dot">Context (aka. the dot)</a></li>
       </ul>
     </li>
-    <li><a href="#pipes">Pipes</a></li>
-    <li><a href="#context-aka-the-dot">Context (aka. the dot)</a></li>
-  </ul>
-
-  <ul>
-    <li><a href="#using-content-page-parameters">Using Content (page) Parameters</a></li>
-    <li><a href="#using-site-config-parameters">Using Site (config) Parameters</a></li>
+    <li><a href="#hugo-parameters">Hugo Parameters</a>
+      <ul>
+        <li><a href="#using-content-page-parameters">Using Content (page) Parameters</a></li>
+        <li><a href="#using-site-config-parameters">Using Site (config) Parameters</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
 

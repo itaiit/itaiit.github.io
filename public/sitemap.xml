@@ -8,6 +8,8 @@
   </url><url>
     <loc>http://localhost:1313/docs/example/table-of-contents/without-toc/</loc>
   </url><url>
+    <loc>http://localhost:1313/docs/example/spring-boot/</loc>
+  </url><url>
     <loc>http://localhost:1313/posts/creating-a-new-theme/</loc>
     <lastmod>2014-09-28T00:00:00+00:00</lastmod>
   </url><url>
@@ -15,6 +17,8 @@
     <lastmod>2014-03-10T00:00:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/docs/example/table-of-contents/</loc>
+  </url><url>
+    <loc>http://localhost:1313/docs/example/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/</loc>
   </url><url>
     <loc>http://localhost:1313/docs/example/collapsed/</loc>
   </url><url>
