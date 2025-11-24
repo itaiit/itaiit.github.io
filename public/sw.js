@@ -2,6 +2,7 @@ const cacheName = self.location.pathname
 const pages = [
 
   "/docs/example/",
+  "/docs/example/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/",
   "/docs/example/table-of-contents/with-toc/",
   "/docs/example/table-of-contents/without-toc/",
   "/docs/example/spring-boot/",
@@ -47,8 +48,8 @@ const pages = [
   "/docs/shortcodes/katex/",
   "/showcases/",
   "/book.min.cc2c524ed250aac81b23d1f4af87344917b325208841feca0968fe450f570575.css",
-  "/en.search-data.min.750754458032b84e7c05ae26ff20290fee8bfb6683400c490af74a76e8be8b70.json",
-  "/en.search.min.7fa39019c504459d7c56063129f58e7dadde1c008885bf966f5bf4aca877f72f.js",
+  "/en.search-data.min.52cf1687d9e9662cac5f2f51b050dd8470d2d9a2b3518181e34b8404401214de.json",
+  "/en.search.min.2ad246b536cecf1a0eadc7798d7acc7dd42c9328527c3c6a0b7f1939a95d580c.js",
   
 ];
 
