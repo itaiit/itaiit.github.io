@@ -2,112 +2,114 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/docs/example/</loc>
+    <loc>https://itaiit.github.io/docs/example/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/example/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/</loc>
+    <loc>https://itaiit.github.io/docs/example/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/example/table-of-contents/with-toc/</loc>
+    <loc>https://itaiit.github.io/docs/example/table-of-contents/with-toc/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/example/table-of-contents/without-toc/</loc>
+    <loc>https://itaiit.github.io/docs/example/spring-boot/spring-boot%E4%B9%8Bdispatcherhandler%E5%88%86%E6%9E%90%E4%B8%8Egateway%E5%AE%9E%E7%8E%B0/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/example/spring-boot/</loc>
+    <loc>https://itaiit.github.io/docs/example/table-of-contents/without-toc/</loc>
   </url><url>
-    <loc>http://localhost:1313/posts/creating-a-new-theme/</loc>
+    <loc>https://itaiit.github.io/docs/example/spring-boot/</loc>
+  </url><url>
+    <loc>https://itaiit.github.io/posts/creating-a-new-theme/</loc>
     <lastmod>2014-09-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/migrate-from-jekyll/</loc>
+    <loc>https://itaiit.github.io/posts/migrate-from-jekyll/</loc>
     <lastmod>2014-03-10T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/docs/example/table-of-contents/</loc>
+    <loc>https://itaiit.github.io/docs/example/table-of-contents/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/example/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/</loc>
+    <loc>https://itaiit.github.io/docs/example/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/example/collapsed/</loc>
+    <loc>https://itaiit.github.io/docs/example/collapsed/</loc>
   </url><url>
-    <loc>http://localhost:1313/</loc>
+    <loc>https://itaiit.github.io/</loc>
     <lastmod>2014-09-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/</loc>
+    <loc>https://itaiit.github.io/posts/</loc>
     <lastmod>2014-09-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/goisforlovers/</loc>
+    <loc>https://itaiit.github.io/posts/goisforlovers/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
+    <loc>https://itaiit.github.io/categories/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/development/</loc>
+    <loc>https://itaiit.github.io/categories/development/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/development/</loc>
+    <loc>https://itaiit.github.io/tags/development/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/hugoisforlovers/</loc>
+    <loc>https://itaiit.github.io/posts/hugoisforlovers/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/go/</loc>
+    <loc>https://itaiit.github.io/tags/go/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/golang/</loc>
+    <loc>https://itaiit.github.io/categories/golang/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/golang/</loc>
+    <loc>https://itaiit.github.io/tags/golang/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/hugo/</loc>
+    <loc>https://itaiit.github.io/tags/hugo/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/</loc>
+    <loc>https://itaiit.github.io/tags/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/templates/</loc>
+    <loc>https://itaiit.github.io/tags/templates/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/themes/</loc>
+    <loc>https://itaiit.github.io/tags/themes/</loc>
     <lastmod>2014-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/docs/example/collapsed/3rd-level/4th-level/</loc>
+    <loc>https://itaiit.github.io/docs/example/collapsed/3rd-level/4th-level/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/example/collapsed/3rd-level/</loc>
+    <loc>https://itaiit.github.io/docs/example/collapsed/3rd-level/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/example/hidden/</loc>
+    <loc>https://itaiit.github.io/docs/example/hidden/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/buttons/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/buttons/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/columns/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/columns/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/details/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/details/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/experimental/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/experimental/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/experimental/asciinema/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/experimental/asciinema/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/experimental/badges/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/experimental/badges/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/experimental/cards/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/experimental/cards/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/experimental/images/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/experimental/images/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/hints/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/hints/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/mermaid/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/mermaid/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/section/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/section/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/section/first-page/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/section/first-page/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/section/second-page/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/section/second-page/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/steps/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/steps/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/tabs/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/tabs/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/</loc>
+    <loc>https://itaiit.github.io/docs/</loc>
   </url><url>
-    <loc>http://localhost:1313/docs/shortcodes/katex/</loc>
+    <loc>https://itaiit.github.io/docs/shortcodes/katex/</loc>
   </url><url>
-    <loc>http://localhost:1313/showcases/</loc>
+    <loc>https://itaiit.github.io/showcases/</loc>
   </url>
 </urlset>

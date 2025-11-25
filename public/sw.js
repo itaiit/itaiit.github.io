@@ -4,6 +4,7 @@ const pages = [
   "/docs/example/",
   "/docs/example/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/",
   "/docs/example/table-of-contents/with-toc/",
+  "/docs/example/spring-boot/spring-boot%E4%B9%8Bdispatcherhandler%E5%88%86%E6%9E%90%E4%B8%8Egateway%E5%AE%9E%E7%8E%B0/",
   "/docs/example/table-of-contents/without-toc/",
   "/docs/example/spring-boot/",
   "/posts/creating-a-new-theme/",
@@ -48,8 +49,8 @@ const pages = [
   "/docs/shortcodes/katex/",
   "/showcases/",
   "/book.min.cc2c524ed250aac81b23d1f4af87344917b325208841feca0968fe450f570575.css",
-  "/en.search-data.min.52cf1687d9e9662cac5f2f51b050dd8470d2d9a2b3518181e34b8404401214de.json",
-  "/en.search.min.2ad246b536cecf1a0eadc7798d7acc7dd42c9328527c3c6a0b7f1939a95d580c.js",
+  "/en.search-data.min.5c450a8e51537955e273729bc14214f922390cdb1ca7010274f62698f899172b.json",
+  "/en.search.min.cdf0d5a3d5ad3aca52a9349670dcd545f11eaeac3b1f3947958bee70fdf41972.js",
   
 ];
 

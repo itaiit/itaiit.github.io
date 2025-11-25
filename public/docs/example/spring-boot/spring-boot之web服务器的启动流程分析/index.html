@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+<head>
   <!--
 Made with Book Theme
 https://github.com/alex-shpak/hugo-book
@@ -27,7 +27,7 @@ this.serverManager = new WebServerManager(this, webServerFactory, this::getHttpH
 ">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
-<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/docs/example/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="https://itaiit.github.io/docs/example/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">
   <meta property="og:site_name" content="itaiit’s site">
   <meta property="og:title" content="Spring Boot之Web服务器的启动流程分析">
   <meta property="og:description" content="Spring Boot之Web服务器的启动流程分析# 如何判断创建哪种web容器：servlet？reactive？# 我们在启动Spring Boot程序的时候，会使用SpringApplication.run方法来启动，在启动流程中首先要判断的就是需要启动什么类型的服务器，是servlet？或者是reactive？那么spring boot是如何进行判断的呢？
@@ -73,12 +73,12 @@ this.serverManager = new WebServerManager(this, webServerFactory, this::getHttpH
 <title>Spring Boot之Web服务器的启动流程分析 | itaiit’s site</title>
 <link rel="icon" href="/favicon.png" >
 <link rel="manifest" href="/manifest.json">
-<link rel="canonical" href="http://localhost:1313/docs/example/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">
+<link rel="canonical" href="https://itaiit.github.io/docs/example/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">
 <link rel="stylesheet" href="/book.min.cc2c524ed250aac81b23d1f4af87344917b325208841feca0968fe450f570575.css" integrity="sha256-zCxSTtJQqsgbI9H0r4c0SRezJSCIQf7KCWj&#43;RQ9XBXU=" crossorigin="anonymous">
 
 
   <script defer src="/fuse.min.js"></script>
-  <script defer src="/en.search.min.2ad246b536cecf1a0eadc7798d7acc7dd42c9328527c3c6a0b7f1939a95d580c.js" integrity="sha256-KtJGtTbOzxoOrcd5jXrMfdQskyhSfDxqC38ZOaldWAw=" crossorigin="anonymous"></script>
+  <script defer src="/en.search.min.cdf0d5a3d5ad3aca52a9349670dcd545f11eaeac3b1f3947958bee70fdf41972.js" integrity="sha256-zfDVo9WtOspSqTSWcNzVRfEerqw7HzlHlYvucP30GXI=" crossorigin="anonymous"></script>
 
   <script defer src="/sw.min.6f6f90fcb8eb1c49ec389838e6b801d0de19430b8e516902f8d75c3c8bd98739.js" integrity="sha256-b2&#43;Q/LjrHEnsOJg45rgB0N4ZQwuOUWkC&#43;NdcPIvZhzk=" crossorigin="anonymous"></script>
 
@@ -167,6 +167,20 @@ this.serverManager = new WebServerManager(this, webServerFactory, this::getHttpH
   
     <a href="/docs/example/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" class="active">
       Spring Boot之Web服务器的启动流程分析</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/spring-boot/spring-boot%E4%B9%8Bdispatcherhandler%E5%88%86%E6%9E%90%E4%B8%8Egateway%E5%AE%9E%E7%8E%B0/" class="">
+      Spring Boot之DispatcherHandler分析与Gateway实现</a>
   
 
         </li>
@@ -741,8 +755,8 @@ spring boot中使用WebServerStartStopLifecycle来管理WebServer的生命周期
     </span>
     <span>
     
-      <a href="/docs/example/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/" class="flex align-center">
-        <span>spring boot 对于Aop 的解析原理和@Transactional注解解析原理</span>
+      <a href="/docs/example/spring-boot/spring-boot%E4%B9%8Bdispatcherhandler%E5%88%86%E6%9E%90%E4%B8%8Egateway%E5%AE%9E%E7%8E%B0/" class="flex align-center">
+        <span>Spring Boot之DispatcherHandler分析与Gateway实现</span>
         <img src="/icons/forward.svg" class="book-icon" alt="Forward" />
       </a>
     
