@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Spring Boot中的工具类-PropertyMapper# 在查看Spring Boot源码的时候发现了这样一处代码：
+public void customize(ConfigurableTomcatWebServerFactory factory) { ServerProperties.Tomcat properties = this.serverProperties.getTomcat(); PropertyMapper map = PropertyMapper.get().alwaysApplyingWhenNonNull(); map.from(properties::getBasedir).to(factory::setBaseDirectory); ...... }代码路径：org.springframework.boot.autoconfigure.web.embedded.TomcatWebServerFactoryCustomizer#customize
+上面代码的应用场景是读取配置文件中关于prefix = &#34;server&#34;的配置，当值不为空的时候就给工厂类中对应的属性赋值。使用这种方式避免了我们对于大量对于值判断的代码：
+if (properties.getBaseDir != null) { factory.setBaseDirectory(properties.getBaseDir); } ......根据PropertyMapper类的描述为：一个实用工具，可用于将值从指定的源对象映射到目标对象。主要旨在辅助将 @ConfigurationProperties 中的配置映射到第三方类时使用。
+">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="https://itaiit.github.io/docs/daily/spring-boot/spring-boot%E4%B8%AD%E7%9A%84%E5%B7%A5%E5%85%B7%E7%B1%BB-propertymapper/">
+  <meta property="og:site_name" content="itaiit’s site">
+  <meta property="og:title" content="Spring Boot中的工具类-PropertyMapper">
+  <meta property="og:description" content="Spring Boot中的工具类-PropertyMapper# 在查看Spring Boot源码的时候发现了这样一处代码：
+public void customize(ConfigurableTomcatWebServerFactory factory) { ServerProperties.Tomcat properties = this.serverProperties.getTomcat(); PropertyMapper map = PropertyMapper.get().alwaysApplyingWhenNonNull(); map.from(properties::getBasedir).to(factory::setBaseDirectory); ...... }代码路径：org.springframework.boot.autoconfigure.web.embedded.TomcatWebServerFactoryCustomizer#customize
+上面代码的应用场景是读取配置文件中关于prefix = &#34;server&#34;的配置，当值不为空的时候就给工厂类中对应的属性赋值。使用这种方式避免了我们对于大量对于值判断的代码：
+if (properties.getBaseDir != null) { factory.setBaseDirectory(properties.getBaseDir); } ......根据PropertyMapper类的描述为：一个实用工具，可用于将值从指定的源对象映射到目标对象。主要旨在辅助将 @ConfigurationProperties 中的配置映射到第三方类时使用。">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="docs">
+
+
+  <meta itemprop="name" content="Spring Boot中的工具类-PropertyMapper">
+  <meta itemprop="description" content="Spring Boot中的工具类-PropertyMapper# 在查看Spring Boot源码的时候发现了这样一处代码：
+public void customize(ConfigurableTomcatWebServerFactory factory) { ServerProperties.Tomcat properties = this.serverProperties.getTomcat(); PropertyMapper map = PropertyMapper.get().alwaysApplyingWhenNonNull(); map.from(properties::getBasedir).to(factory::setBaseDirectory); ...... }代码路径：org.springframework.boot.autoconfigure.web.embedded.TomcatWebServerFactoryCustomizer#customize
+上面代码的应用场景是读取配置文件中关于prefix = &#34;server&#34;的配置，当值不为空的时候就给工厂类中对应的属性赋值。使用这种方式避免了我们对于大量对于值判断的代码：
+if (properties.getBaseDir != null) { factory.setBaseDirectory(properties.getBaseDir); } ......根据PropertyMapper类的描述为：一个实用工具，可用于将值从指定的源对象映射到目标对象。主要旨在辅助将 @ConfigurationProperties 中的配置映射到第三方类时使用。">
+  <meta itemprop="wordCount" content="33">
+
+<title>Spring Boot中的工具类-PropertyMapper | itaiit’s site</title>
+<link rel="icon" href="/favicon.png" >
+<link rel="manifest" href="/manifest.json">
+<link rel="canonical" href="https://itaiit.github.io/docs/daily/spring-boot/spring-boot%E4%B8%AD%E7%9A%84%E5%B7%A5%E5%85%B7%E7%B1%BB-propertymapper/">
+<link rel="stylesheet" href="/book.min.cc2c524ed250aac81b23d1f4af87344917b325208841feca0968fe450f570575.css" integrity="sha256-zCxSTtJQqsgbI9H0r4c0SRezJSCIQf7KCWj&#43;RQ9XBXU=" crossorigin="anonymous">
+
+
+  <script defer src="/fuse.min.js"></script>
+  <script defer src="/en.search.min.ff6fb0f09eff8885dabc69961d2679cbf659793409b192330dbe699b8e209cab.js" integrity="sha256-/2&#43;w8J7/iIXavGmWHSZ5y/ZZeTQJsZIzDb5pm44gnKs=" crossorigin="anonymous"></script>
+
+  <script defer src="/sw.min.6f6f90fcb8eb1c49ec389838e6b801d0de19430b8e516902f8d75c3c8bd98739.js" integrity="sha256-b2&#43;Q/LjrHEnsOJg45rgB0N4ZQwuOUWkC&#43;NdcPIvZhzk=" crossorigin="anonymous"></script>
+
+
+
+  
+</head>
+<body dir="ltr" class="book-kind-page book-type-docs">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    
+<aside class="book-menu">
+  <div class="book-menu-content">
+    
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/"><span>itaiit’s site</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input id="book-search-input" type="text" 
+    placeholder="Search"
+    aria-label="Search"
+    maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <ul>
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <a href="/docs/daily/" class="">
+      Example Site</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-98c832ef025cafda6bc79eebf1ef625a" class="toggle" checked />
+    <label for="section-98c832ef025cafda6bc79eebf1ef625a" class="flex">
+      <a role="button" class="">
+        Spring Boot</a>
+      <img src="/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" class="">
+      Spring Boot之Web服务器的启动流程分析</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/spring-boot/spring-boot%E4%B9%8Bdispatcherhandler%E5%88%86%E6%9E%90%E4%B8%8Egateway%E5%AE%9E%E7%8E%B0/" class="">
+      Spring Boot之DispatcherHandler分析与Gateway实现</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/spring-boot/spring-boo%E4%B8%ADembed-tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" class="">
+      Spring Boo中embed tomcat的加载流程分析</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/" class="">
+      Spring Boot 对于Aop 的解析原理和@Transactional注解解析原理</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/spring-boot/spring-boot%E4%B8%AD%E7%9A%84%E5%B7%A5%E5%85%B7%E7%B1%BB-propertymapper/" class="active">
+      Spring Boot中的工具类-PropertyMapper</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/table-of-contents/" class="">
+      Table of Contents</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/table-of-contents/with-toc/" class="">
+      With ToC</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/table-of-contents/without-toc/" class="">
+      Without ToC</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-68f8bf9ef45fcc80b249aa4028eb3eff" class="toggle"  />
+    <label for="section-68f8bf9ef45fcc80b249aa4028eb3eff" class="flex">
+      <a role="button" class="">
+        Collapsed</a>
+      <img src="/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/collapsed/3rd-level/" class="">
+      3rd Level</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/collapsed/3rd-level/4th-level/" class="">
+      4th Level</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <a>
+      Shortcodes</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/buttons/" class="">
+      Buttons</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/columns/" class="">
+      Columns</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/details/" class="">
+      Details</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-5e80ef8b51b64ede4189e57e824948b7" class="toggle"  />
+    <label for="section-5e80ef8b51b64ede4189e57e824948b7" class="flex">
+      <a role="button" class="">
+        Experimental</a>
+      <img src="/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/experimental/asciinema/" class="">
+      Asciinema</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/experimental/badges/" class="">
+      Badges</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/experimental/cards/" class="">
+      Cards</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/experimental/images/" class="">
+      Images</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/hints/" class="">
+      Hints</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/mermaid/" class="">
+      Mermaid</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/steps/" class="">
+      Steps</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/tabs/" class="">
+      Tabs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/katex/" class="">
+      KaTeX</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+<ul><li><a href="/posts/" title="Blog">Blog</a></li></ul>
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+
+  </div>
+</aside>
+ 
+
+    <div class="book-page">
+      <header class="book-header hidden">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/icons/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>Spring Boot中的工具类-PropertyMapper</h3>
+
+  <label for="toc-control">
+    
+    <img src="/icons/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#spring-boot中的工具类-propertymapper">Spring Boot中的工具类-PropertyMapper</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="spring-boot中的工具类-propertymapper">Spring Boot中的工具类-PropertyMapper<a class="anchor" href="#spring-boot%e4%b8%ad%e7%9a%84%e5%b7%a5%e5%85%b7%e7%b1%bb-propertymapper">#</a></h1>
+<p>在查看Spring Boot源码的时候发现了这样一处代码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff5c57">public</span> <span style="color:#9aedfe">void</span> <span style="color:#57c7ff">customize</span>(ConfigurableTomcatWebServerFactory factory) {
+</span></span><span style="display:flex;"><span>    ServerProperties.<span style="color:#57c7ff">Tomcat</span> properties <span style="color:#ff6ac1">=</span> <span style="color:#ff6ac1">this</span>.<span style="color:#57c7ff">serverProperties</span>.<span style="color:#57c7ff">getTomcat</span>();
+</span></span><span style="display:flex;"><span>    PropertyMapper map <span style="color:#ff6ac1">=</span> PropertyMapper.<span style="color:#57c7ff">get</span>().<span style="color:#57c7ff">alwaysApplyingWhenNonNull</span>();
+</span></span><span style="display:flex;"><span>    map.<span style="color:#57c7ff">from</span>(properties::getBasedir).<span style="color:#57c7ff">to</span>(factory::setBaseDirectory);
+</span></span><span style="display:flex;"><span>    ......
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div><p>代码路径：<code>org.springframework.boot.autoconfigure.web.embedded.TomcatWebServerFactoryCustomizer#customize</code></p>
+<p>上面代码的应用场景是读取配置文件中关于<code>prefix = &quot;server&quot;</code>的配置，当值不为空的时候就给工厂类中对应的属性赋值。使用这种方式避免了我们对于大量对于值判断的代码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff6ac1">if</span> (properties.<span style="color:#57c7ff">getBaseDir</span> <span style="color:#ff6ac1">!=</span> <span style="color:#ff6ac1">null</span>) {
+</span></span><span style="display:flex;"><span>    factory.<span style="color:#57c7ff">setBaseDirectory</span>(properties.<span style="color:#57c7ff">getBaseDir</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>......</span></span></code></pre></div><p>根据PropertyMapper类的描述为：一个实用工具，可用于将值从指定的源对象映射到目标对象。主要旨在辅助将 @ConfigurationProperties 中的配置映射到第三方类时使用。</p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+<div>
+
+</div>
+
+<div>
+
+  <a class="flex align-center" href="https://github.com/alex-shpak/hugo-book/edit/main/exampleSite/content/docs/daily/spring-boot/Spring%20Boot%E4%B8%AD%E7%9A%84%E5%B7%A5%E5%85%B7%E7%B1%BB-PropertyMapper.md" target="_blank" rel="noopener edit">
+    <img src="/icons/edit.svg" class="book-icon" alt="Edit" />
+    <span>Edit this page</span>
+  </a>
+
+</div>
+
+</div>
+
+
+
+
+
+  
+  
+  
+  <div class="flex flex-wrap justify-between">
+    <span>
+    
+      <a href="/docs/daily/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/" class="flex align-center">
+        <img src="/icons/backward.svg" class="book-icon" alt="Backward" />
+        <span>Spring Boot 对于Aop 的解析原理和@Transactional注解解析原理</span>
+      </a>
+    
+    </span>
+    <span>
+    
+      <a href="/docs/daily/table-of-contents/" class="flex align-center">
+        <span>Table of Contents</span>
+        <img src="/icons/forward.svg" class="book-icon" alt="Forward" />
+      </a>
+    
+    </span>
+  </div>
+  
+
+
+ 
+        
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+        
+        
+  
+ 
+        
+  
+  
+    <script>(function(){document.querySelectorAll("pre:has(code)").forEach(e=>{e.addEventListener("click",e.focus),e.addEventListener("copy",function(t){if(t.preventDefault(),navigator.clipboard){const t=window.getSelection().toString()||e.textContent;navigator.clipboard.writeText(t)}})})})()</script>
+  
+
+      </footer>
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+  
+  <aside class="book-toc">
+    <div class="book-toc-content">
+      
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#spring-boot中的工具类-propertymapper">Spring Boot中的工具类-PropertyMapper</a></li>
+  </ul>
+</nav>
+
+
+
+    </div>
+  </aside>
+  
+ 
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

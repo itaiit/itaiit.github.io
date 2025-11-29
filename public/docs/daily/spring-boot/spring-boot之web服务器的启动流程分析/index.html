@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Spring Boot之Web服务器的启动流程分析# 如何判断创建哪种web容器：servlet？reactive？# 我们在启动Spring Boot程序的时候，会使用SpringApplication.run方法来启动，在启动流程中首先要判断的就是需要启动什么类型的服务器，是servlet？或者是reactive？那么spring boot是如何进行判断的呢？
+根据上面的流程首先会判断出来要创建的web服务器的类型，然后通过spring.factories文件中的配置的ApplicationContextFactory实现，根据容器类型来创建出对应的容器：
+reactive：AnnotationConfigReactiveWebServerApplicationContext； servlet：AnnotationConfigServletWebServerApplicationContext； 上面已经创建出了对应的Spring容器，接下来就是要启动服务器来接收请求了，下面来看具体的流程：
+我们假设创建的是reactive的容器，即AnnotationConfigReactiveWebServerApplicationContext。该类继承自ReactiveWebServerApplicationContext，该类中重写了生命周期中的onRefresh方法来创建一个WebServer
+@Override protected void onRefresh() { super.onRefresh(); try { createWebServer(); } catch (Throwable ex) { throw new ApplicationContextException(&#34;Unable to start reactive web server&#34;, ex); } }在createWebServer()中完成的步骤就是一个：初始化WebServerManager。
+this.serverManager = new WebServerManager(this, webServerFactory, this::getHttpHandler, lazyInit);初始化WebServerManager# 从容器中获取ReactiveWebServerFactory# 在容器中获取，首先需要容器中有ReactiveWebServerFactory的实现，经过查找发现是通过自动配置的方式将ReactiveWebServerFactory的实现加载到spring容器中的。我们查看autoconfiguration的配置发现有ReactiveWebServerFactoryAutoConfiguration自动配置类。
+首先web服务需要是reactive类型的，然后通过@Import的方式我们看到加载了多种web服务器。通过打断点的方式，发现此处加载的NettyReactiveWebServerFactory，也就是最终生效的是EmbeddedNetty。这里创建的都是工厂类，还不是实际的web服务器，这里返回的是NettyReactiveWebServerFactory。
+从容器中获取HttpHandler# HttpHandler是spring处理http协议请求的顶级抽象接口，同样是从容器中获取的该接口的实现。我们还是查看自动配置类，发现HttpHandler的自动配置类是HttpHandlerAutoConfiguration。在自动配置类中通过WebHttpHandlerBuilder最终会创建出HttpHandler。下面看详细的创建流程：
+初始化过程中，从容器中获取的WebHandler实现开始，在基础之上依次封装了：负责过滤器执行、负责处理异常、使用适配器将webHandler与httpHandler结合 这三种能力之后完成bean对象的创建。
+从上面的流程可以看出，最原始的对象则是在容器中获得的名字为webHandler的实例。那么有没有呢，其实是有的： 上面的配置是在自动配置类WebFluxAutoConfiguration中完成的。除此之外我们还应注意到的是在步骤2中的applicationContext方法注释： 上面的说明也明确了我们可以进行拓展的地方，比如可以实现WebFilter接口，将自己的过滤逻辑添加进程序的执行流程中。
+此时我们得到了构造WebServerManager的主要参数，即有一个WebServerFactory还有一个HttpHandler。接下来就可以来创建WebServerManager对象了。
+创建WebServerManager# 因为是通过new的方式创建的对象，调用的是WebServerManager的构造器，查看构造器发现多了一个额外的逻辑：通过ReactiveWebServerFactory来创建webServer。接下来来看一下具体流程。
+创建webServer# 前面提到我们获得到的是NettyReactiveWebServerFactory工厂，通过getWebServer最终会创建出来一个netty服务器。详细的创建流程如下：
+首先会通过Netty的HttpServer.create()方法创建出来一个HttpServer。然后就是将我们的httpHandler与netty的handler进行结合。
+在netty中插入请求处理器的方式是调用handler方法：HttpServer.handle(this.handler)，这里我们的传参就是上面第4步骤返回的适配器handler。这样当netty接收到请求的时候，会通过netty中的handler将请求代理到我们程序的处理逻辑中。
+最终创建出来的是NettyWebServer对象，里面包含了Netty服务器、httpHandler和routeProviders。
+">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="https://itaiit.github.io/docs/daily/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">
+  <meta property="og:site_name" content="itaiit’s site">
+  <meta property="og:title" content="Spring Boot之Web服务器的启动流程分析">
+  <meta property="og:description" content="Spring Boot之Web服务器的启动流程分析# 如何判断创建哪种web容器：servlet？reactive？# 我们在启动Spring Boot程序的时候，会使用SpringApplication.run方法来启动，在启动流程中首先要判断的就是需要启动什么类型的服务器，是servlet？或者是reactive？那么spring boot是如何进行判断的呢？
+根据上面的流程首先会判断出来要创建的web服务器的类型，然后通过spring.factories文件中的配置的ApplicationContextFactory实现，根据容器类型来创建出对应的容器：
+reactive：AnnotationConfigReactiveWebServerApplicationContext； servlet：AnnotationConfigServletWebServerApplicationContext； 上面已经创建出了对应的Spring容器，接下来就是要启动服务器来接收请求了，下面来看具体的流程：
+我们假设创建的是reactive的容器，即AnnotationConfigReactiveWebServerApplicationContext。该类继承自ReactiveWebServerApplicationContext，该类中重写了生命周期中的onRefresh方法来创建一个WebServer
+@Override protected void onRefresh() { super.onRefresh(); try { createWebServer(); } catch (Throwable ex) { throw new ApplicationContextException(&#34;Unable to start reactive web server&#34;, ex); } }在createWebServer()中完成的步骤就是一个：初始化WebServerManager。
+this.serverManager = new WebServerManager(this, webServerFactory, this::getHttpHandler, lazyInit);初始化WebServerManager# 从容器中获取ReactiveWebServerFactory# 在容器中获取，首先需要容器中有ReactiveWebServerFactory的实现，经过查找发现是通过自动配置的方式将ReactiveWebServerFactory的实现加载到spring容器中的。我们查看autoconfiguration的配置发现有ReactiveWebServerFactoryAutoConfiguration自动配置类。
+首先web服务需要是reactive类型的，然后通过@Import的方式我们看到加载了多种web服务器。通过打断点的方式，发现此处加载的NettyReactiveWebServerFactory，也就是最终生效的是EmbeddedNetty。这里创建的都是工厂类，还不是实际的web服务器，这里返回的是NettyReactiveWebServerFactory。
+从容器中获取HttpHandler# HttpHandler是spring处理http协议请求的顶级抽象接口，同样是从容器中获取的该接口的实现。我们还是查看自动配置类，发现HttpHandler的自动配置类是HttpHandlerAutoConfiguration。在自动配置类中通过WebHttpHandlerBuilder最终会创建出HttpHandler。下面看详细的创建流程：
+初始化过程中，从容器中获取的WebHandler实现开始，在基础之上依次封装了：负责过滤器执行、负责处理异常、使用适配器将webHandler与httpHandler结合 这三种能力之后完成bean对象的创建。
+从上面的流程可以看出，最原始的对象则是在容器中获得的名字为webHandler的实例。那么有没有呢，其实是有的： 上面的配置是在自动配置类WebFluxAutoConfiguration中完成的。除此之外我们还应注意到的是在步骤2中的applicationContext方法注释： 上面的说明也明确了我们可以进行拓展的地方，比如可以实现WebFilter接口，将自己的过滤逻辑添加进程序的执行流程中。
+此时我们得到了构造WebServerManager的主要参数，即有一个WebServerFactory还有一个HttpHandler。接下来就可以来创建WebServerManager对象了。
+创建WebServerManager# 因为是通过new的方式创建的对象，调用的是WebServerManager的构造器，查看构造器发现多了一个额外的逻辑：通过ReactiveWebServerFactory来创建webServer。接下来来看一下具体流程。
+创建webServer# 前面提到我们获得到的是NettyReactiveWebServerFactory工厂，通过getWebServer最终会创建出来一个netty服务器。详细的创建流程如下：
+首先会通过Netty的HttpServer.create()方法创建出来一个HttpServer。然后就是将我们的httpHandler与netty的handler进行结合。
+在netty中插入请求处理器的方式是调用handler方法：HttpServer.handle(this.handler)，这里我们的传参就是上面第4步骤返回的适配器handler。这样当netty接收到请求的时候，会通过netty中的handler将请求代理到我们程序的处理逻辑中。
+最终创建出来的是NettyWebServer对象，里面包含了Netty服务器、httpHandler和routeProviders。">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="docs">
+
+
+  <meta itemprop="name" content="Spring Boot之Web服务器的启动流程分析">
+  <meta itemprop="description" content="Spring Boot之Web服务器的启动流程分析# 如何判断创建哪种web容器：servlet？reactive？# 我们在启动Spring Boot程序的时候，会使用SpringApplication.run方法来启动，在启动流程中首先要判断的就是需要启动什么类型的服务器，是servlet？或者是reactive？那么spring boot是如何进行判断的呢？
+根据上面的流程首先会判断出来要创建的web服务器的类型，然后通过spring.factories文件中的配置的ApplicationContextFactory实现，根据容器类型来创建出对应的容器：
+reactive：AnnotationConfigReactiveWebServerApplicationContext； servlet：AnnotationConfigServletWebServerApplicationContext； 上面已经创建出了对应的Spring容器，接下来就是要启动服务器来接收请求了，下面来看具体的流程：
+我们假设创建的是reactive的容器，即AnnotationConfigReactiveWebServerApplicationContext。该类继承自ReactiveWebServerApplicationContext，该类中重写了生命周期中的onRefresh方法来创建一个WebServer
+@Override protected void onRefresh() { super.onRefresh(); try { createWebServer(); } catch (Throwable ex) { throw new ApplicationContextException(&#34;Unable to start reactive web server&#34;, ex); } }在createWebServer()中完成的步骤就是一个：初始化WebServerManager。
+this.serverManager = new WebServerManager(this, webServerFactory, this::getHttpHandler, lazyInit);初始化WebServerManager# 从容器中获取ReactiveWebServerFactory# 在容器中获取，首先需要容器中有ReactiveWebServerFactory的实现，经过查找发现是通过自动配置的方式将ReactiveWebServerFactory的实现加载到spring容器中的。我们查看autoconfiguration的配置发现有ReactiveWebServerFactoryAutoConfiguration自动配置类。
+首先web服务需要是reactive类型的，然后通过@Import的方式我们看到加载了多种web服务器。通过打断点的方式，发现此处加载的NettyReactiveWebServerFactory，也就是最终生效的是EmbeddedNetty。这里创建的都是工厂类，还不是实际的web服务器，这里返回的是NettyReactiveWebServerFactory。
+从容器中获取HttpHandler# HttpHandler是spring处理http协议请求的顶级抽象接口，同样是从容器中获取的该接口的实现。我们还是查看自动配置类，发现HttpHandler的自动配置类是HttpHandlerAutoConfiguration。在自动配置类中通过WebHttpHandlerBuilder最终会创建出HttpHandler。下面看详细的创建流程：
+初始化过程中，从容器中获取的WebHandler实现开始，在基础之上依次封装了：负责过滤器执行、负责处理异常、使用适配器将webHandler与httpHandler结合 这三种能力之后完成bean对象的创建。
+从上面的流程可以看出，最原始的对象则是在容器中获得的名字为webHandler的实例。那么有没有呢，其实是有的： 上面的配置是在自动配置类WebFluxAutoConfiguration中完成的。除此之外我们还应注意到的是在步骤2中的applicationContext方法注释： 上面的说明也明确了我们可以进行拓展的地方，比如可以实现WebFilter接口，将自己的过滤逻辑添加进程序的执行流程中。
+此时我们得到了构造WebServerManager的主要参数，即有一个WebServerFactory还有一个HttpHandler。接下来就可以来创建WebServerManager对象了。
+创建WebServerManager# 因为是通过new的方式创建的对象，调用的是WebServerManager的构造器，查看构造器发现多了一个额外的逻辑：通过ReactiveWebServerFactory来创建webServer。接下来来看一下具体流程。
+创建webServer# 前面提到我们获得到的是NettyReactiveWebServerFactory工厂，通过getWebServer最终会创建出来一个netty服务器。详细的创建流程如下：
+首先会通过Netty的HttpServer.create()方法创建出来一个HttpServer。然后就是将我们的httpHandler与netty的handler进行结合。
+在netty中插入请求处理器的方式是调用handler方法：HttpServer.handle(this.handler)，这里我们的传参就是上面第4步骤返回的适配器handler。这样当netty接收到请求的时候，会通过netty中的handler将请求代理到我们程序的处理逻辑中。
+最终创建出来的是NettyWebServer对象，里面包含了Netty服务器、httpHandler和routeProviders。">
+  <meta itemprop="wordCount" content="131">
+
+<title>Spring Boot之Web服务器的启动流程分析 | itaiit’s site</title>
+<link rel="icon" href="/favicon.png" >
+<link rel="manifest" href="/manifest.json">
+<link rel="canonical" href="https://itaiit.github.io/docs/daily/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">
+<link rel="stylesheet" href="/book.min.cc2c524ed250aac81b23d1f4af87344917b325208841feca0968fe450f570575.css" integrity="sha256-zCxSTtJQqsgbI9H0r4c0SRezJSCIQf7KCWj&#43;RQ9XBXU=" crossorigin="anonymous">
+
+
+  <script defer src="/fuse.min.js"></script>
+  <script defer src="/en.search.min.ff6fb0f09eff8885dabc69961d2679cbf659793409b192330dbe699b8e209cab.js" integrity="sha256-/2&#43;w8J7/iIXavGmWHSZ5y/ZZeTQJsZIzDb5pm44gnKs=" crossorigin="anonymous"></script>
+
+  <script defer src="/sw.min.6f6f90fcb8eb1c49ec389838e6b801d0de19430b8e516902f8d75c3c8bd98739.js" integrity="sha256-b2&#43;Q/LjrHEnsOJg45rgB0N4ZQwuOUWkC&#43;NdcPIvZhzk=" crossorigin="anonymous"></script>
+
+
+
+  
+</head>
+<body dir="ltr" class="book-kind-page book-type-docs">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    
+<aside class="book-menu">
+  <div class="book-menu-content">
+    
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/"><span>itaiit’s site</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input id="book-search-input" type="text" 
+    placeholder="Search"
+    aria-label="Search"
+    maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <ul>
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <a href="/docs/daily/" class="">
+      Example Site</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-98c832ef025cafda6bc79eebf1ef625a" class="toggle" checked />
+    <label for="section-98c832ef025cafda6bc79eebf1ef625a" class="flex">
+      <a role="button" class="">
+        Spring Boot</a>
+      <img src="/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" class="active">
+      Spring Boot之Web服务器的启动流程分析</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/spring-boot/spring-boot%E4%B9%8Bdispatcherhandler%E5%88%86%E6%9E%90%E4%B8%8Egateway%E5%AE%9E%E7%8E%B0/" class="">
+      Spring Boot之DispatcherHandler分析与Gateway实现</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/spring-boot/spring-boo%E4%B8%ADembed-tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" class="">
+      Spring Boo中embed tomcat的加载流程分析</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/" class="">
+      Spring Boot 对于Aop 的解析原理和@Transactional注解解析原理</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/spring-boot/spring-boot%E4%B8%AD%E7%9A%84%E5%B7%A5%E5%85%B7%E7%B1%BB-propertymapper/" class="">
+      Spring Boot中的工具类-PropertyMapper</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/table-of-contents/" class="">
+      Table of Contents</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/table-of-contents/with-toc/" class="">
+      With ToC</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/table-of-contents/without-toc/" class="">
+      Without ToC</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-68f8bf9ef45fcc80b249aa4028eb3eff" class="toggle"  />
+    <label for="section-68f8bf9ef45fcc80b249aa4028eb3eff" class="flex">
+      <a role="button" class="">
+        Collapsed</a>
+      <img src="/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/collapsed/3rd-level/" class="">
+      3rd Level</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/daily/collapsed/3rd-level/4th-level/" class="">
+      4th Level</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <a>
+      Shortcodes</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/buttons/" class="">
+      Buttons</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/columns/" class="">
+      Columns</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/details/" class="">
+      Details</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-5e80ef8b51b64ede4189e57e824948b7" class="toggle"  />
+    <label for="section-5e80ef8b51b64ede4189e57e824948b7" class="flex">
+      <a role="button" class="">
+        Experimental</a>
+      <img src="/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/experimental/asciinema/" class="">
+      Asciinema</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/experimental/badges/" class="">
+      Badges</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/experimental/cards/" class="">
+      Cards</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/experimental/images/" class="">
+      Images</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/hints/" class="">
+      Hints</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/mermaid/" class="">
+      Mermaid</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/steps/" class="">
+      Steps</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/tabs/" class="">
+      Tabs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/katex/" class="">
+      KaTeX</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+<ul><li><a href="/posts/" title="Blog">Blog</a></li></ul>
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+
+  </div>
+</aside>
+ 
+
+    <div class="book-page">
+      <header class="book-header hidden">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/icons/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>Spring Boot之Web服务器的启动流程分析</h3>
+
+  <label for="toc-control">
+    
+    <img src="/icons/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#spring-boot之web服务器的启动流程分析">Spring Boot之Web服务器的启动流程分析</a>
+      <ul>
+        <li><a href="#如何判断创建哪种web容器servletreactive">如何判断创建哪种web容器：servlet？reactive？</a></li>
+        <li><a href="#初始化webservermanager">初始化WebServerManager</a>
+          <ul>
+            <li><a href="#从容器中获取reactivewebserverfactory">从容器中获取ReactiveWebServerFactory</a></li>
+            <li><a href="#从容器中获取httphandler">从容器中获取HttpHandler</a></li>
+            <li><a href="#创建webservermanager">创建WebServerManager</a></li>
+            <li><a href="#启动nettywebserver">启动NettyWebServer</a></li>
+          </ul>
+        </li>
+        <li><a href="#总结">总结</a></li>
+        <li><a href="#补充知识">补充知识</a>
+          <ul>
+            <li><a href="#webhandler和httphandler的对比">WebHandler和HttpHandler的对比</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="spring-boot之web服务器的启动流程分析">Spring Boot之Web服务器的启动流程分析<a class="anchor" href="#spring-boot%e4%b9%8bweb%e6%9c%8d%e5%8a%a1%e5%99%a8%e7%9a%84%e5%90%af%e5%8a%a8%e6%b5%81%e7%a8%8b%e5%88%86%e6%9e%90">#</a></h1>
+<h2 id="如何判断创建哪种web容器servletreactive">如何判断创建哪种web容器：servlet？reactive？<a class="anchor" href="#%e5%a6%82%e4%bd%95%e5%88%a4%e6%96%ad%e5%88%9b%e5%bb%ba%e5%93%aa%e7%a7%8dweb%e5%ae%b9%e5%99%a8servletreactive">#</a></h2>
+<p>我们在启动Spring Boot程序的时候，会使用SpringApplication.run方法来启动，在启动流程中首先要判断的就是需要启动什么类型的服务器，是servlet？或者是reactive？那么spring boot是如何进行判断的呢？</p>
+<p><img src="/assets/mermaid-diagram-2025-05-13-171400.png" alt="img" /></p>
+<p>根据上面的流程首先会判断出来要创建的web服务器的类型，然后通过spring.factories文件中的配置的ApplicationContextFactory实现，根据容器类型来创建出对应的容器：</p>
+<ul>
+<li>reactive：AnnotationConfigReactiveWebServerApplicationContext；</li>
+<li>servlet：AnnotationConfigServletWebServerApplicationContext；</li>
+</ul>
+<p>上面已经创建出了对应的Spring容器，接下来就是要启动服务器来接收请求了，下面来看具体的流程：</p>
+<p>我们假设创建的是reactive的容器，即<code>AnnotationConfigReactiveWebServerApplicationContext</code>。该类继承自<code>ReactiveWebServerApplicationContext</code>，该类中重写了生命周期中的<code>onRefresh</code>方法来创建一个<code>WebServer</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff9f43">@Override</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">protected</span> <span style="color:#9aedfe">void</span> <span style="color:#57c7ff">onRefresh</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">super</span>.<span style="color:#57c7ff">onRefresh</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">try</span> {
+</span></span><span style="display:flex;"><span>    createWebServer();
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">catch</span> (Throwable ex) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">throw</span> <span style="color:#ff6ac1">new</span> ApplicationContextException(<span style="color:#5af78e">&#34;Unable to start reactive web server&#34;</span>, ex);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div><p>在<code>createWebServer()</code>中完成的步骤就是一个：初始化<code>WebServerManager</code>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff6ac1">this</span>.<span style="color:#57c7ff">serverManager</span> <span style="color:#ff6ac1">=</span> <span style="color:#ff6ac1">new</span> WebServerManager(<span style="color:#ff6ac1">this</span>, webServerFactory, <span style="color:#ff6ac1">this</span>::getHttpHandler, lazyInit);</span></span></code></pre></div><h2 id="初始化webservermanager">初始化WebServerManager<a class="anchor" href="#%e5%88%9d%e5%a7%8b%e5%8c%96webservermanager">#</a></h2>
+<h3 id="从容器中获取reactivewebserverfactory">从容器中获取ReactiveWebServerFactory<a class="anchor" href="#%e4%bb%8e%e5%ae%b9%e5%99%a8%e4%b8%ad%e8%8e%b7%e5%8f%96reactivewebserverfactory">#</a></h3>
+<p>在容器中获取，首先需要容器中有<code>ReactiveWebServerFactory</code>的实现，经过查找发现是通过自动配置的方式将<code>ReactiveWebServerFactory</code>的实现加载到spring容器中的。我们查看autoconfiguration的配置发现有<code>ReactiveWebServerFactoryAutoConfiguration</code>自动配置类。</p>
+<p><img src="/assets/Snipaste_2025-05-13_19-23-42-1024x268.png" alt="img" /></p>
+<p>首先web服务需要是reactive类型的，然后通过<code>@Import</code>的方式我们看到加载了多种web服务器。通过打断点的方式，发现此处加载的<code>NettyReactiveWebServerFactory</code>，也就是最终生效的是<code>EmbeddedNetty</code>。这里创建的都是工厂类，还不是实际的web服务器，这里返回的是<code>NettyReactiveWebServerFactory</code>。</p>
+<h3 id="从容器中获取httphandler">从容器中获取HttpHandler<a class="anchor" href="#%e4%bb%8e%e5%ae%b9%e5%99%a8%e4%b8%ad%e8%8e%b7%e5%8f%96httphandler">#</a></h3>
+<p>HttpHandler是spring处理http协议请求的顶级抽象接口，同样是从容器中获取的该接口的实现。我们还是查看自动配置类，发现<code>HttpHandler</code>的自动配置类是<code>HttpHandlerAutoConfiguration</code>。在自动配置类中通过<code>WebHttpHandlerBuilder</code>最终会创建出<code>HttpHandler</code>。下面看详细的创建流程：</p>
+<p><img src="/assets/httphandler-1024x421.png" alt="img" /></p>
+<p>初始化过程中，从容器中获取的WebHandler实现开始，在基础之上依次封装了：<em>负责过滤器执行、负责处理异常、使用适配器将webHandler与httpHandler结合</em> 这三种能力之后完成bean对象的创建。</p>
+<p>从上面的流程可以看出，最原始的对象则是在容器中获得的名字为webHandler的实例。那么有没有呢，其实是有的：
+<img src="/assets/Snipaste_2025-05-13_20-43-57-1024x212.png" alt="img" />
+上面的配置是在自动配置类WebFluxAutoConfiguration中完成的。除此之外我们还应注意到的是在步骤2中的applicationContext方法注释：
+<img src="/assets/Snipaste_2025-05-13_20-48-57-1024x424.png" alt="img" />
+上面的说明也明确了我们可以进行拓展的地方，比如可以实现WebFilter接口，将自己的过滤逻辑添加进程序的执行流程中。</p>
+<p>此时我们得到了构造WebServerManager的主要参数，即有一个WebServerFactory还有一个HttpHandler。接下来就可以来创建WebServerManager对象了。</p>
+<h3 id="创建webservermanager">创建WebServerManager<a class="anchor" href="#%e5%88%9b%e5%bb%bawebservermanager">#</a></h3>
+<p>因为是通过new的方式创建的对象，调用的是WebServerManager的构造器，查看构造器发现多了一个额外的逻辑：通过ReactiveWebServerFactory来创建webServer。接下来来看一下具体流程。</p>
+<h4 id="创建webserver">创建webServer<a class="anchor" href="#%e5%88%9b%e5%bb%bawebserver">#</a></h4>
+<p>前面提到我们获得到的是<code>NettyReactiveWebServerFactory</code>工厂，通过<code>getWebServer</code>最终会创建出来一个netty服务器。详细的创建流程如下：</p>
+<p><img src="/assets/NettyReactiveWebServerFactory-1.png" alt="img" /></p>
+<p>首先会通过Netty的<code>HttpServer.create()</code>方法创建出来一个HttpServer。然后就是将我们的httpHandler与netty的handler进行结合。</p>
+<p>在netty中插入请求处理器的方式是调用handler方法：<code>HttpServer.handle(this.handler)</code>，这里我们的传参就是上面第4步骤返回的适配器handler。这样当netty接收到请求的时候，会通过netty中的handler将请求代理到我们程序的处理逻辑中。</p>
+<p><img src="/assets/Snipaste_2025-05-13_22-09-59-1024x313.png" alt="img" /></p>
+<p>最终创建出来的是<code>NettyWebServer</code>对象，里面包含了Netty服务器、httpHandler和routeProviders。</p>
+<h3 id="启动nettywebserver">启动NettyWebServer<a class="anchor" href="#%e5%90%af%e5%8a%a8nettywebserver">#</a></h3>
+<p>上面创建好了Netty服务器，但是还没有启动它，需要把它添加到spring的生命周期中随着程序的启动同时启动web服务器。
+spring boot中使用WebServerStartStopLifecycle来管理WebServer的生命周期。WebServerStartStopLifecycle实现了生命周期接口SmartLifecycle，监听到程序的启动start和停止stop。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>getBeanFactory().<span style="color:#57c7ff">registerSingleton</span>(<span style="color:#5af78e">&#34;webServerStartStop&#34;</span>,
+</span></span><span style="display:flex;"><span>       <span style="color:#ff6ac1">new</span> WebServerStartStopLifecycle(<span style="color:#ff6ac1">this</span>.<span style="color:#57c7ff">serverManager</span>));</span></span></code></pre></div><h2 id="总结">总结<a class="anchor" href="#%e6%80%bb%e7%bb%93">#</a></h2>
+<p>针对于reactive类型的Web容器，Spring Boot在启动的时候通过生命周期方法同时会启动Web服务器来接收请求。在使用Netty作为底层Web服务器的时候，通过handler适配器，将我们的业务逻辑处理流程与Netty的请求处理结合在一起，将请求的处理转入到Spring Boot的体系中。</p>
+<p>不同的Web服务器的实现则只需要提供对应的适配器将handler进行结合，使请求能够通过适配器转入到Spring Boot的处理逻辑中即可。</p>
+<p>我们简单看一下Tomcat服务器的创建代码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff5c57">public</span> WebServer <span style="color:#57c7ff">getWebServer</span>(HttpHandler httpHandler) {
+</span></span><span style="display:flex;"><span>  ......
+</span></span><span style="display:flex;"><span>  <span style="color:#78787e">// 创建Tomcat服务器实例</span>
+</span></span><span style="display:flex;"><span>  Tomcat tomcat <span style="color:#ff6ac1">=</span> <span style="color:#ff6ac1">new</span> Tomcat();
+</span></span><span style="display:flex;"><span>  ......
+</span></span><span style="display:flex;"><span>  Connector connector <span style="color:#ff6ac1">=</span> <span style="color:#ff6ac1">new</span> Connector(<span style="color:#ff6ac1">this</span>.<span style="color:#57c7ff">protocol</span>);
+</span></span><span style="display:flex;"><span>  ......
+</span></span><span style="display:flex;"><span>  <span style="color:#78787e">// 使用Adapter将httpHandler嵌入到tomcat服务器中</span>
+</span></span><span style="display:flex;"><span>  TomcatHttpHandlerAdapter servlet <span style="color:#ff6ac1">=</span> <span style="color:#ff6ac1">new</span> TomcatHttpHandlerAdapter(httpHandler);
+</span></span><span style="display:flex;"><span>  prepareContext(tomcat.<span style="color:#57c7ff">getHost</span>(), servlet);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">return</span> getTomcatWebServer(tomcat);
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div><h2 id="补充知识">补充知识<a class="anchor" href="#%e8%a1%a5%e5%85%85%e7%9f%a5%e8%af%86">#</a></h2>
+<h3 id="webhandler和httphandler的对比">WebHandler和HttpHandler的对比<a class="anchor" href="#webhandler%e5%92%8chttphandler%e7%9a%84%e5%af%b9%e6%af%94">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th><strong>功能</strong></th>
+          <th><strong><code>WebHandler</code></strong></th>
+          <th><strong><code>HttpHandler</code></strong></th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>过滤器链支持</td>
+          <td>支持（<code>WebFilter</code>）</td>
+          <td>不支持</td>
+      </tr>
+      <tr>
+          <td>异常处理</td>
+          <td>支持（<code>WebExceptionHandler</code>）</td>
+          <td>不支持</td>
+      </tr>
+      <tr>
+          <td>会话管理</td>
+          <td>支持（<code>WebSession</code>）</td>
+          <td>不支持</td>
+      </tr>
+      <tr>
+          <td>与 Spring WebFlux 集成</td>
+          <td>高度集成</td>
+          <td>手动集成</td>
+      </tr>
+      <tr>
+          <td>响应式上下文</td>
+          <td>支持（<code>Context</code>）</td>
+          <td>不支持</td>
+      </tr>
+      <tr>
+          <td>高级请求/响应处理</td>
+          <td>支持（<code>ServerWebExchange</code>）</td>
+          <td>手动实现</td>
+      </tr>
+  </tbody>
+</table>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+<div>
+
+</div>
+
+<div>
+
+  <a class="flex align-center" href="https://github.com/alex-shpak/hugo-book/edit/main/exampleSite/content/docs/daily/spring-boot/Spring%20Boot%E4%B9%8BWeb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.md" target="_blank" rel="noopener edit">
+    <img src="/icons/edit.svg" class="book-icon" alt="Edit" />
+    <span>Edit this page</span>
+  </a>
+
+</div>
+
+</div>
+
+
+
+
+
+  
+  
+  
+  <div class="flex flex-wrap justify-between">
+    <span>
+    
+      <a href="/docs/daily/" class="flex align-center">
+        <img src="/icons/backward.svg" class="book-icon" alt="Backward" />
+        <span>Example Site</span>
+      </a>
+    
+    </span>
+    <span>
+    
+      <a href="/docs/daily/spring-boot/spring-boot%E4%B9%8Bdispatcherhandler%E5%88%86%E6%9E%90%E4%B8%8Egateway%E5%AE%9E%E7%8E%B0/" class="flex align-center">
+        <span>Spring Boot之DispatcherHandler分析与Gateway实现</span>
+        <img src="/icons/forward.svg" class="book-icon" alt="Forward" />
+      </a>
+    
+    </span>
+  </div>
+  
+
+
+ 
+        
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+        
+        
+  
+ 
+        
+  
+  
+    <script>(function(){document.querySelectorAll("pre:has(code)").forEach(e=>{e.addEventListener("click",e.focus),e.addEventListener("copy",function(t){if(t.preventDefault(),navigator.clipboard){const t=window.getSelection().toString()||e.textContent;navigator.clipboard.writeText(t)}})})})()</script>
+  
+
+      </footer>
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+  
+  <aside class="book-toc">
+    <div class="book-toc-content">
+      
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#spring-boot之web服务器的启动流程分析">Spring Boot之Web服务器的启动流程分析</a>
+      <ul>
+        <li><a href="#如何判断创建哪种web容器servletreactive">如何判断创建哪种web容器：servlet？reactive？</a></li>
+        <li><a href="#初始化webservermanager">初始化WebServerManager</a>
+          <ul>
+            <li><a href="#从容器中获取reactivewebserverfactory">从容器中获取ReactiveWebServerFactory</a></li>
+            <li><a href="#从容器中获取httphandler">从容器中获取HttpHandler</a></li>
+            <li><a href="#创建webservermanager">创建WebServerManager</a></li>
+            <li><a href="#启动nettywebserver">启动NettyWebServer</a></li>
+          </ul>
+        </li>
+        <li><a href="#总结">总结</a></li>
+        <li><a href="#补充知识">补充知识</a>
+          <ul>
+            <li><a href="#webhandler和httphandler的对比">WebHandler和HttpHandler的对比</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+    </div>
+  </aside>
+  
+ 
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
