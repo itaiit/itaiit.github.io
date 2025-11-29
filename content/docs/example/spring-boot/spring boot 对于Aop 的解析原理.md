@@ -1,5 +1,5 @@
 ---
-title: spring boot 对于Aop 的解析原理和@Transactional注解解析原理
+title: Spring Boot 对于Aop 的解析原理和@Transactional注解解析原理
 weight: 10
 ---
 # spring boot 对于Aop 的解析原理和@Transactional注解解析原理

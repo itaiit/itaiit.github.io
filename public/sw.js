@@ -6,11 +6,13 @@ const pages = [
   "/docs/example/table-of-contents/with-toc/",
   "/docs/example/spring-boot/spring-boot%E4%B9%8Bdispatcherhandler%E5%88%86%E6%9E%90%E4%B8%8Egateway%E5%AE%9E%E7%8E%B0/",
   "/docs/example/table-of-contents/without-toc/",
+  "/docs/example/spring-boot/spring-boo%E4%B8%ADembed-tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/",
   "/docs/example/spring-boot/",
   "/posts/creating-a-new-theme/",
   "/posts/migrate-from-jekyll/",
   "/docs/example/table-of-contents/",
   "/docs/example/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/",
+  "/docs/example/spring-boot/spring-boot%E4%B8%AD%E7%9A%84%E5%B7%A5%E5%85%B7%E7%B1%BB-propertymapper/",
   "/docs/example/collapsed/",
   "/",
   "/posts/",
@@ -49,8 +51,8 @@ const pages = [
   "/docs/shortcodes/katex/",
   "/showcases/",
   "/book.min.cc2c524ed250aac81b23d1f4af87344917b325208841feca0968fe450f570575.css",
-  "/en.search-data.min.5c450a8e51537955e273729bc14214f922390cdb1ca7010274f62698f899172b.json",
-  "/en.search.min.cdf0d5a3d5ad3aca52a9349670dcd545f11eaeac3b1f3947958bee70fdf41972.js",
+  "/en.search-data.min.36eeed35e24e6edb1ae3e53f78153b5bc66a0ba8a725dce1b5bca61c9172b781.json",
+  "/en.search.min.eed5ca01d8ec24b0dd6cbb9138d0504369edfd11dc6786956ca2831d8486cd23.js",
   
 ];
 

@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Spring Boo中embed tomcat的加载流程分析# 我们来了解一下spring boot中内置的tomcat：embed tomcat的创建过程。
+通过Tomcat的官网介绍，我们可以了解到Tomcat中有Server、Service、Connector、Engine、Host、Context这几个术语。它们之间的关系如图： 在上面的图中，
+Server（服务器）
+在 Tomcat 体系中，一个 Server 代表整个容器。Tomcat 提供了 Server 接口的默认实现，用户很少对其进行自定义。
+Service（服务）
+Service 是一个位于 Server 内部的中间组件，它将一个或多个 Connector（连接器）绑定到唯一一个 Engine（引擎）。用户很少自定义 Service 元素，因为其默认实现简单且已足够满足需求：即 Service 接口。
+Engine（引擎）
+Engine 代表某个特定 Service 的请求处理流水线。由于一个 Service 可能包含多个 Connector，Engine 会接收并处理来自这些连接器的所有请求，并将响应交还给相应的连接器，由其传回客户端。虽然可以实现 Engine 接口以提供自定义引擎，但这种情况并不常见。
+Host（虚拟主机）
+Host 表示一个网络名称（例如 www.yourcompany.com）与 Tomcat 服务器的关联。一个 Engine 可包含多个 Host，且 Host 元素还支持网络别名，如 yourcompany.com 和 abc.yourcompany.com。用户很少创建自定义 Host，因为 StandardHost 实现已提供了大量附加功能。
+Connector（连接器）
+Connector 负责处理与客户端的通信，每一个Connector里面有一个协议处理器可以处理某种网络协议的客户端通信。可以处理的协议有：HTTP/1.1、AJP/1.3和导入到类路径中的某种协议（会通过反射进行获取）。
+Context（上下文）
+Context 代表一个 Web 应用程序。一个 Host 可包含多个 Context，每个 Context 拥有唯一的路径（path）。虽然可以实现 Context 接口以创建自定义上下文，但这种情况极为少见，因为 StandardContext 已提供了丰富的附加功能。
+">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="https://itaiit.github.io/docs/example/spring-boot/spring-boo%E4%B8%ADembed-tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">
+  <meta property="og:site_name" content="itaiit’s site">
+  <meta property="og:title" content="Spring Boo中embed tomcat的加载流程分析">
+  <meta property="og:description" content="Spring Boo中embed tomcat的加载流程分析# 我们来了解一下spring boot中内置的tomcat：embed tomcat的创建过程。
+通过Tomcat的官网介绍，我们可以了解到Tomcat中有Server、Service、Connector、Engine、Host、Context这几个术语。它们之间的关系如图： 在上面的图中，
+Server（服务器）
+在 Tomcat 体系中，一个 Server 代表整个容器。Tomcat 提供了 Server 接口的默认实现，用户很少对其进行自定义。
+Service（服务）
+Service 是一个位于 Server 内部的中间组件，它将一个或多个 Connector（连接器）绑定到唯一一个 Engine（引擎）。用户很少自定义 Service 元素，因为其默认实现简单且已足够满足需求：即 Service 接口。
+Engine（引擎）
+Engine 代表某个特定 Service 的请求处理流水线。由于一个 Service 可能包含多个 Connector，Engine 会接收并处理来自这些连接器的所有请求，并将响应交还给相应的连接器，由其传回客户端。虽然可以实现 Engine 接口以提供自定义引擎，但这种情况并不常见。
+Host（虚拟主机）
+Host 表示一个网络名称（例如 www.yourcompany.com）与 Tomcat 服务器的关联。一个 Engine 可包含多个 Host，且 Host 元素还支持网络别名，如 yourcompany.com 和 abc.yourcompany.com。用户很少创建自定义 Host，因为 StandardHost 实现已提供了大量附加功能。
+Connector（连接器）
+Connector 负责处理与客户端的通信，每一个Connector里面有一个协议处理器可以处理某种网络协议的客户端通信。可以处理的协议有：HTTP/1.1、AJP/1.3和导入到类路径中的某种协议（会通过反射进行获取）。
+Context（上下文）
+Context 代表一个 Web 应用程序。一个 Host 可包含多个 Context，每个 Context 拥有唯一的路径（path）。虽然可以实现 Context 接口以创建自定义上下文，但这种情况极为少见，因为 StandardContext 已提供了丰富的附加功能。">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="docs">
+
+
+  <meta itemprop="name" content="Spring Boo中embed tomcat的加载流程分析">
+  <meta itemprop="description" content="Spring Boo中embed tomcat的加载流程分析# 我们来了解一下spring boot中内置的tomcat：embed tomcat的创建过程。
+通过Tomcat的官网介绍，我们可以了解到Tomcat中有Server、Service、Connector、Engine、Host、Context这几个术语。它们之间的关系如图： 在上面的图中，
+Server（服务器）
+在 Tomcat 体系中，一个 Server 代表整个容器。Tomcat 提供了 Server 接口的默认实现，用户很少对其进行自定义。
+Service（服务）
+Service 是一个位于 Server 内部的中间组件，它将一个或多个 Connector（连接器）绑定到唯一一个 Engine（引擎）。用户很少自定义 Service 元素，因为其默认实现简单且已足够满足需求：即 Service 接口。
+Engine（引擎）
+Engine 代表某个特定 Service 的请求处理流水线。由于一个 Service 可能包含多个 Connector，Engine 会接收并处理来自这些连接器的所有请求，并将响应交还给相应的连接器，由其传回客户端。虽然可以实现 Engine 接口以提供自定义引擎，但这种情况并不常见。
+Host（虚拟主机）
+Host 表示一个网络名称（例如 www.yourcompany.com）与 Tomcat 服务器的关联。一个 Engine 可包含多个 Host，且 Host 元素还支持网络别名，如 yourcompany.com 和 abc.yourcompany.com。用户很少创建自定义 Host，因为 StandardHost 实现已提供了大量附加功能。
+Connector（连接器）
+Connector 负责处理与客户端的通信，每一个Connector里面有一个协议处理器可以处理某种网络协议的客户端通信。可以处理的协议有：HTTP/1.1、AJP/1.3和导入到类路径中的某种协议（会通过反射进行获取）。
+Context（上下文）
+Context 代表一个 Web 应用程序。一个 Host 可包含多个 Context，每个 Context 拥有唯一的路径（path）。虽然可以实现 Context 接口以创建自定义上下文，但这种情况极为少见，因为 StandardContext 已提供了丰富的附加功能。">
+  <meta itemprop="wordCount" content="505">
+
+<title>Spring Boo中embed tomcat的加载流程分析 | itaiit’s site</title>
+<link rel="icon" href="/favicon.png" >
+<link rel="manifest" href="/manifest.json">
+<link rel="canonical" href="https://itaiit.github.io/docs/example/spring-boot/spring-boo%E4%B8%ADembed-tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">
+<link rel="stylesheet" href="/book.min.cc2c524ed250aac81b23d1f4af87344917b325208841feca0968fe450f570575.css" integrity="sha256-zCxSTtJQqsgbI9H0r4c0SRezJSCIQf7KCWj&#43;RQ9XBXU=" crossorigin="anonymous">
+
+
+  <script defer src="/fuse.min.js"></script>
+  <script defer src="/en.search.min.eed5ca01d8ec24b0dd6cbb9138d0504369edfd11dc6786956ca2831d8486cd23.js" integrity="sha256-7tXKAdjsJLDdbLuRONBQQ2nt/RHcZ4aVbKKDHYSGzSM=" crossorigin="anonymous"></script>
+
+  <script defer src="/sw.min.6f6f90fcb8eb1c49ec389838e6b801d0de19430b8e516902f8d75c3c8bd98739.js" integrity="sha256-b2&#43;Q/LjrHEnsOJg45rgB0N4ZQwuOUWkC&#43;NdcPIvZhzk=" crossorigin="anonymous"></script>
+
+
+
+  
+</head>
+<body dir="ltr" class="book-kind-page book-type-docs">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    
+<aside class="book-menu">
+  <div class="book-menu-content">
+    
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/"><span>itaiit’s site</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input id="book-search-input" type="text" 
+    placeholder="Search"
+    aria-label="Search"
+    maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <ul>
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <a href="/docs/example/" class="">
+      Example Site</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-653911d2f51c8df012e3192a0fb85252" class="toggle" checked />
+    <label for="section-653911d2f51c8df012e3192a0fb85252" class="flex">
+      <a role="button" class="">
+        Spring Boot</a>
+      <img src="/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/spring-boot/spring-boot%E4%B9%8Bweb%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" class="">
+      Spring Boot之Web服务器的启动流程分析</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/spring-boot/spring-boot%E4%B9%8Bdispatcherhandler%E5%88%86%E6%9E%90%E4%B8%8Egateway%E5%AE%9E%E7%8E%B0/" class="">
+      Spring Boot之DispatcherHandler分析与Gateway实现</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/spring-boot/spring-boo%E4%B8%ADembed-tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" class="active">
+      Spring Boo中embed tomcat的加载流程分析</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/" class="">
+      Spring Boot 对于Aop 的解析原理和@Transactional注解解析原理</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/spring-boot/spring-boot%E4%B8%AD%E7%9A%84%E5%B7%A5%E5%85%B7%E7%B1%BB-propertymapper/" class="">
+      Spring Boot中的工具类-PropertyMapper</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/table-of-contents/" class="">
+      Table of Contents</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/table-of-contents/with-toc/" class="">
+      With ToC</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/table-of-contents/without-toc/" class="">
+      Without ToC</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-47c8cc6f30711a6cd8738a2132df2db8" class="toggle"  />
+    <label for="section-47c8cc6f30711a6cd8738a2132df2db8" class="flex">
+      <a role="button" class="">
+        Collapsed</a>
+      <img src="/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/collapsed/3rd-level/" class="">
+      3rd Level</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/collapsed/3rd-level/4th-level/" class="">
+      4th Level</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li class="book-section-flat" >
+          
+  
+  
+
+  
+    <a>
+      Shortcodes</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/buttons/" class="">
+      Buttons</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/columns/" class="">
+      Columns</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/details/" class="">
+      Details</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-5e80ef8b51b64ede4189e57e824948b7" class="toggle"  />
+    <label for="section-5e80ef8b51b64ede4189e57e824948b7" class="flex">
+      <a role="button" class="">
+        Experimental</a>
+      <img src="/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/experimental/asciinema/" class="">
+      Asciinema</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/experimental/badges/" class="">
+      Badges</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/experimental/cards/" class="">
+      Cards</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/experimental/images/" class="">
+      Images</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/hints/" class="">
+      Hints</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/mermaid/" class="">
+      Mermaid</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/steps/" class="">
+      Steps</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/tabs/" class="">
+      Tabs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/shortcodes/katex/" class="">
+      KaTeX</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+<ul><li><a href="/posts/" title="Blog">Blog</a></li></ul>
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+
+  </div>
+</aside>
+ 
+
+    <div class="book-page">
+      <header class="book-header hidden">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/icons/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>Spring Boo中embed tomcat的加载流程分析</h3>
+
+  <label for="toc-control">
+    
+    <img src="/icons/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#spring-boo中embed-tomcat的加载流程分析">Spring Boo中embed tomcat的加载流程分析</a>
+      <ul>
+        <li><a href="#启动一个tomcat的示例代码">启动一个Tomcat的示例代码</a></li>
+        <li><a href="#spring-boot中tomcat的创建过程">Spring Boot中tomcat的创建过程</a></li>
+        <li><a href="#servletcontextinitializer拓展">ServletContextInitializer拓展</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article"><h1 id="spring-boo中embed-tomcat的加载流程分析">Spring Boo中embed tomcat的加载流程分析<a class="anchor" href="#spring-boo%e4%b8%adembed-tomcat%e7%9a%84%e5%8a%a0%e8%bd%bd%e6%b5%81%e7%a8%8b%e5%88%86%e6%9e%90">#</a></h1>
+<p>我们来了解一下spring boot中内置的tomcat：embed tomcat的创建过程。</p>
+<p>通过Tomcat的官网<a href="https://tomcat.apache.org/tomcat-10.1-doc/architecture/overview.html">介绍</a>，我们可以了解到Tomcat中有Server、Service、Connector、Engine、Host、Context这几个术语。它们之间的关系如图：
+<img src="/assets/1764223903595-1f939a7c-3484-4dfa-9b2e-aa52871c8052.png" alt="img" />
+在上面的图中，</p>
+<ol>
+<li>
+<p>Server（服务器）</p>
+<p>在 Tomcat 体系中，一个 Server 代表整个容器。Tomcat 提供了 Server 接口的默认实现，用户很少对其进行自定义。</p>
+</li>
+<li>
+<p>Service（服务）</p>
+<p>Service 是一个位于 Server 内部的中间组件，它将一个或多个 Connector（连接器）绑定到唯一一个 Engine（引擎）。用户很少自定义 Service 元素，因为其默认实现简单且已足够满足需求：即 Service 接口。</p>
+</li>
+<li>
+<p>Engine（引擎）</p>
+<p>Engine 代表某个特定 Service 的请求处理流水线。由于一个 Service 可能包含多个 Connector，Engine 会接收并处理来自这些连接器的所有请求，并将响应交还给相应的连接器，由其传回客户端。虽然可以实现 Engine 接口以提供自定义引擎，但这种情况并不常见。</p>
+</li>
+<li>
+<p>Host（虚拟主机）</p>
+<p>Host 表示一个网络名称（例如 <a href="https://www.yourcompany.com">www.yourcompany.com</a>）与 Tomcat 服务器的关联。一个 Engine 可包含多个 Host，且 Host 元素还支持网络别名，如 yourcompany.com 和 abc.yourcompany.com。用户很少创建自定义 Host，因为 StandardHost 实现已提供了大量附加功能。</p>
+</li>
+<li>
+<p>Connector（连接器）</p>
+<p>Connector 负责处理与客户端的通信，每一个Connector里面有一个协议处理器可以处理某种网络协议的客户端通信。可以处理的协议有：HTTP/1.1、AJP/1.3和导入到类路径中的某种协议（会通过反射进行获取）。</p>
+</li>
+<li>
+<p>Context（上下文）</p>
+<p>Context 代表一个 Web 应用程序。一个 Host 可包含多个 Context，每个 Context 拥有唯一的路径（path）。虽然可以实现 Context 接口以创建自定义上下文，但这种情况极为少见，因为 StandardContext 已提供了丰富的附加功能。</p>
+</li>
+</ol>
+<h2 id="启动一个tomcat的示例代码">启动一个Tomcat的示例代码<a class="anchor" href="#%e5%90%af%e5%8a%a8%e4%b8%80%e4%b8%aatomcat%e7%9a%84%e7%a4%ba%e4%be%8b%e4%bb%a3%e7%a0%81">#</a></h2>
+<ol>
+<li>引入embed-tomcat依赖：</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span>  <span style="color:#ff6ac1">&lt;dependency&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff6ac1">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#ff6ac1">&lt;/groupId&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff6ac1">&lt;artifactId&gt;</span>spring-boot-starter-tomcat<span style="color:#ff6ac1">&lt;/artifactId&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff6ac1">&lt;version&gt;</span>3.2.12<span style="color:#ff6ac1">&lt;/version&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">&lt;/dependency&gt;</span></span></span></code></pre></div><ol start="2">
+<li>编写示例类：</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff5c57">public</span> <span style="color:#ff5c57">class</span> <span style="color:#f3f99d">TomcatApp</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff5c57">public</span> <span style="color:#ff5c57">static</span> <span style="color:#9aedfe">void</span> <span style="color:#57c7ff">main</span>(String<span style="color:#ff6ac1">[]</span> args) {
+</span></span><span style="display:flex;"><span>        Tomcat tomcat <span style="color:#ff6ac1">=</span> <span style="color:#ff6ac1">new</span> Tomcat();
+</span></span><span style="display:flex;"><span>        tomcat.<span style="color:#57c7ff">setPort</span>(8080);
+</span></span><span style="display:flex;"><span>        <span style="color:#ff6ac1">try</span> {
+</span></span><span style="display:flex;"><span>            Connector connector <span style="color:#ff6ac1">=</span> tomcat.<span style="color:#57c7ff">getConnector</span>();
+</span></span><span style="display:flex;"><span>            tomcat.<span style="color:#57c7ff">getHost</span>().<span style="color:#57c7ff">setAutoDeploy</span>(<span style="color:#ff6ac1">false</span>);
+</span></span><span style="display:flex;"><span>            tomcat.<span style="color:#57c7ff">addContext</span>(<span style="color:#5af78e">&#34;/app&#34;</span>, <span style="color:#5af78e">&#34;files&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#78787e">// 增加一个servlet</span>
+</span></span><span style="display:flex;"><span>            Wrapper servlet <span style="color:#ff6ac1">=</span> tomcat.<span style="color:#57c7ff">addServlet</span>(<span style="color:#5af78e">&#34;/app&#34;</span>, <span style="color:#5af78e">&#34;default&#34;</span>, <span style="color:#5af78e">&#34;io.itaiit.servlet.DispatcherServlet&#34;</span>);
+</span></span><span style="display:flex;"><span>            servlet.<span style="color:#57c7ff">addMapping</span>(<span style="color:#5af78e">&#34;/&#34;</span>);
+</span></span><span style="display:flex;"><span>            servlet.<span style="color:#57c7ff">setLoadOnStartup</span>(1);
+</span></span><span style="display:flex;"><span>            <span style="color:#78787e">// 启动tomcat</span>
+</span></span><span style="display:flex;"><span>            tomcat.<span style="color:#57c7ff">start</span>();
+</span></span><span style="display:flex;"><span>            System.<span style="color:#57c7ff">out</span>.<span style="color:#57c7ff">println</span>(<span style="color:#5af78e">&#34;tomcat started.......&#34;</span>);
+</span></span><span style="display:flex;"><span>        } <span style="color:#ff6ac1">catch</span> (LifecycleException e) {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff6ac1">throw</span> <span style="color:#ff6ac1">new</span> RuntimeException(e);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">public</span> <span style="color:#ff5c57">class</span> <span style="color:#f3f99d">DispatcherServlet</span> <span style="color:#ff5c57">extends</span> HttpServlet {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff9f43">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff5c57">protected</span> <span style="color:#9aedfe">void</span> <span style="color:#57c7ff">doGet</span>(HttpServletRequest req, HttpServletResponse resp) <span style="color:#ff5c57">throws</span> ServletException, IOException {
+</span></span><span style="display:flex;"><span>        System.<span style="color:#57c7ff">out</span>.<span style="color:#57c7ff">println</span>(<span style="color:#5af78e">&#34;DispatcherServlet.doGet&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div><ol start="3">
+<li>启动之后，可以在浏览器中请求：<em>http://localhost:8080/app</em>；请求会进入servlet的doGet方法。</li>
+</ol>
+<h2 id="spring-boot中tomcat的创建过程">Spring Boot中tomcat的创建过程<a class="anchor" href="#spring-boot%e4%b8%adtomcat%e7%9a%84%e5%88%9b%e5%bb%ba%e8%bf%87%e7%a8%8b">#</a></h2>
+<p>在Spring Boot中，当容器是servlet类型的时候，通过<code>ApplicationContextFactory</code>工厂会创建出<code>AnnotationConfigServletWebServerApplicationContext</code>类型的容器上下文对象。在Spring Boot的启动生命周期中的刷新阶段(<code>org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext#onRefresh</code>)，会创建Tomcat服务器，并进行启动。</p>
+<ol>
+<li><strong>刷新容器</strong>：</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff9f43">@Override</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">protected</span> <span style="color:#9aedfe">void</span> <span style="color:#57c7ff">onRefresh</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff5c57">super</span>.<span style="color:#57c7ff">onRefresh</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">try</span> {
+</span></span><span style="display:flex;"><span>        createWebServer();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">catch</span> (Throwable ex) {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff6ac1">throw</span> <span style="color:#ff6ac1">new</span> ApplicationContextException(<span style="color:#5af78e">&#34;Unable to start web server&#34;</span>, ex);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div><ol start="2">
+<li><strong>创建WebServer</strong>：</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff5c57">private</span> <span style="color:#9aedfe">void</span> <span style="color:#57c7ff">createWebServer</span>() {
+</span></span><span style="display:flex;"><span>    ......
+</span></span><span style="display:flex;"><span>    ServletWebServerFactory factory <span style="color:#ff6ac1">=</span> getWebServerFactory();
+</span></span><span style="display:flex;"><span>    createWebServer.<span style="color:#57c7ff">tag</span>(<span style="color:#5af78e">&#34;factory&#34;</span>, factory.<span style="color:#57c7ff">getClass</span>().<span style="color:#57c7ff">toString</span>());
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">this</span>.<span style="color:#57c7ff">webServer</span> <span style="color:#ff6ac1">=</span> factory.<span style="color:#57c7ff">getWebServer</span>(getSelfInitializer());
+</span></span><span style="display:flex;"><span>    createWebServer.<span style="color:#57c7ff">end</span>();
+</span></span><span style="display:flex;"><span>    ......
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div><p>当我们使用tomcat作为容器的时候，<code>WebServerFactory</code>会返回<code>TomcatServletWebServerFactory</code>。我们来看<code>getWebServer</code>方法：</p>
+<ol start="3">
+<li><strong>创建Tomcat</strong>：</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff5c57">public</span> WebServer <span style="color:#57c7ff">getWebServer</span>(ServletContextInitializer... initializers) {
+</span></span><span style="display:flex;"><span>    ......
+</span></span><span style="display:flex;"><span>    <span style="color:#78787e">// 创建tomcat</span>
+</span></span><span style="display:flex;"><span>    Tomcat tomcat <span style="color:#ff6ac1">=</span> <span style="color:#ff6ac1">new</span> Tomcat();
+</span></span><span style="display:flex;"><span>    File baseDir <span style="color:#ff6ac1">=</span> (<span style="color:#ff6ac1">this</span>.<span style="color:#57c7ff">baseDirectory</span> <span style="color:#ff6ac1">!=</span> <span style="color:#ff6ac1">null</span>) <span style="color:#ff6ac1">?</span> <span style="color:#ff6ac1">this</span>.<span style="color:#57c7ff">baseDirectory</span> : createTempDir(<span style="color:#5af78e">&#34;tomcat&#34;</span>);
+</span></span><span style="display:flex;"><span>    tomcat.<span style="color:#57c7ff">setBaseDir</span>(baseDir.<span style="color:#57c7ff">getAbsolutePath</span>());
+</span></span><span style="display:flex;"><span>    ......
+</span></span><span style="display:flex;"><span>    Connector connector <span style="color:#ff6ac1">=</span> <span style="color:#ff6ac1">new</span> Connector(<span style="color:#ff6ac1">this</span>.<span style="color:#57c7ff">protocol</span>);
+</span></span><span style="display:flex;"><span>    connector.<span style="color:#57c7ff">setThrowOnFailure</span>(<span style="color:#ff6ac1">true</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#78787e">// 添加connector</span>
+</span></span><span style="display:flex;"><span>    tomcat.<span style="color:#57c7ff">getService</span>().<span style="color:#57c7ff">addConnector</span>(connector);
+</span></span><span style="display:flex;"><span>    customizeConnector(connector);
+</span></span><span style="display:flex;"><span>    tomcat.<span style="color:#57c7ff">setConnector</span>(connector);
+</span></span><span style="display:flex;"><span>    tomcat.<span style="color:#57c7ff">getHost</span>().<span style="color:#57c7ff">setAutoDeploy</span>(<span style="color:#ff6ac1">false</span>);
+</span></span><span style="display:flex;"><span>    configureEngine(tomcat.<span style="color:#57c7ff">getEngine</span>());
+</span></span><span style="display:flex;"><span>    <span style="color:#78787e">// 配置context</span>
+</span></span><span style="display:flex;"><span>    prepareContext(tomcat.<span style="color:#57c7ff">getHost</span>(), initializers);
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">return</span> getTomcatWebServer(tomcat);
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div><ol start="4">
+<li><strong>配置Context</strong>：</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff5c57">protected</span> <span style="color:#9aedfe">void</span> <span style="color:#57c7ff">prepareContext</span>(Host host, ServletContextInitializer<span style="color:#ff6ac1">[]</span> initializers) {
+</span></span><span style="display:flex;"><span>    File documentRoot <span style="color:#ff6ac1">=</span> getValidDocumentRoot();
+</span></span><span style="display:flex;"><span>    <span style="color:#78787e">// 创建Context实例</span>
+</span></span><span style="display:flex;"><span>    TomcatEmbeddedContext context <span style="color:#ff6ac1">=</span> <span style="color:#ff6ac1">new</span> TomcatEmbeddedContext();
+</span></span><span style="display:flex;"><span>    context.<span style="color:#57c7ff">setName</span>(getContextPath());
+</span></span><span style="display:flex;"><span>    context.<span style="color:#57c7ff">setDisplayName</span>(getDisplayName());
+</span></span><span style="display:flex;"><span>    context.<span style="color:#57c7ff">setPath</span>(getContextPath());
+</span></span><span style="display:flex;"><span>    File docBase <span style="color:#ff6ac1">=</span> (documentRoot <span style="color:#ff6ac1">!=</span> <span style="color:#ff6ac1">null</span>) <span style="color:#ff6ac1">?</span> documentRoot : createTempDir(<span style="color:#5af78e">&#34;tomcat-docbase&#34;</span>);
+</span></span><span style="display:flex;"><span>    context.<span style="color:#57c7ff">setDocBase</span>(docBase.<span style="color:#57c7ff">getAbsolutePath</span>());
+</span></span><span style="display:flex;"><span>    context.<span style="color:#57c7ff">addLifecycleListener</span>(<span style="color:#ff6ac1">new</span> FixContextListener());
+</span></span><span style="display:flex;"><span>    ......
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">if</span> (isRegisterDefaultServlet()) {
+</span></span><span style="display:flex;"><span>        addDefaultServlet(context);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">if</span> (shouldRegisterJspServlet()) {
+</span></span><span style="display:flex;"><span>        addJspServlet(context);
+</span></span><span style="display:flex;"><span>        addJasperInitializer(context);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    context.<span style="color:#57c7ff">addLifecycleListener</span>(<span style="color:#ff6ac1">new</span> StaticResourceConfigurer(context));
+</span></span><span style="display:flex;"><span>    ServletContextInitializer<span style="color:#ff6ac1">[]</span> initializersToUse <span style="color:#ff6ac1">=</span> mergeInitializers(initializers);
+</span></span><span style="display:flex;"><span>    host.<span style="color:#57c7ff">addChild</span>(context);
+</span></span><span style="display:flex;"><span>    <span style="color:#78787e">// 配置context，添加spring拓展的servlet</span>
+</span></span><span style="display:flex;"><span>    configureContext(context, initializersToUse);
+</span></span><span style="display:flex;"><span>    ......
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div><p>在context中存在一个<code>Map&lt;ServletContainerInitializer,Set&lt;Class&lt;?&gt;&gt;&gt; initializers</code>类型的成员变量，里面保存了<code>ServletContainerInitializer</code>接口的实现和用于执行<code>onStartup</code>方法的时候的<code>Set&lt;Class&lt;?&gt;&gt;</code>类型参数。</p>
+<p>在上面配置Context的时候，则是通过<code>addServletContainerInitializer</code>方法，手动添加进去。</p>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff5c57">protected</span> <span style="color:#9aedfe">void</span> <span style="color:#57c7ff">configureContext</span>(Context context, ServletContextInitializer<span style="color:#ff6ac1">[]</span> initializers) {
+</span></span><span style="display:flex;"><span>    TomcatStarter starter <span style="color:#ff6ac1">=</span> <span style="color:#ff6ac1">new</span> TomcatStarter(initializers);
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">if</span> (context <span style="color:#ff6ac1">instanceof</span> TomcatEmbeddedContext embeddedContext) {
+</span></span><span style="display:flex;"><span>        embeddedContext.<span style="color:#57c7ff">setStarter</span>(starter);
+</span></span><span style="display:flex;"><span>        embeddedContext.<span style="color:#57c7ff">setFailCtxIfServletStartFails</span>(<span style="color:#ff6ac1">true</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#78787e">// 将TomcatStarter添加进initializers中，TomcatStarter也是ServletContainerInitializer接口的实现类</span>
+</span></span><span style="display:flex;"><span>    context.<span style="color:#57c7ff">addServletContainerInitializer</span>(starter, NO_CLASSES);
+</span></span><span style="display:flex;"><span>    ......
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">for</span> (TomcatContextCustomizer customizer : <span style="color:#ff6ac1">this</span>.<span style="color:#57c7ff">tomcatContextCustomizers</span>) {
+</span></span><span style="display:flex;"><span>        customizer.<span style="color:#57c7ff">customize</span>(context);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div><p>在这里我们可以看到在spring boot中，创建tomcat的时候把<code>TomcatStarter</code>添加进了context中，而<code>TomcatStarter</code>实现了<code>ServletContainerInitializer</code>接口。</p>
+<p>我们查看<code>ServletContainerInitializer</code>接口实现类，会发现还有一个<code>SpringServletContainerInitializer</code>实现类。这个类是在<code>META-INF/services/jakarta.servlet.ServletContainerInitializer</code>文件中定义的，使用的是SPI机制加载，需要注意的是在spring boot项目中，<strong>这个类不会被加载生效，只有通过打包成war部署到外部的tomcat中的时候，才会被加载</strong>。</p>
+<h2 id="servletcontextinitializer拓展">ServletContextInitializer拓展<a class="anchor" href="#servletcontextinitializer%e6%8b%93%e5%b1%95">#</a></h2>
+<p>在embed tomcat的启动过程中，tomcat会在初始化Context的时候执行<code>ServletContainerInitializer</code>的onStartup方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff9f43">@Override</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">public</span> <span style="color:#9aedfe">void</span> <span style="color:#57c7ff">onStartup</span>(Set<span style="color:#ff6ac1">&lt;</span>Class<span style="color:#ff6ac1">&lt;?&gt;&gt;</span> classes, ServletContext servletContext) <span style="color:#ff5c57">throws</span> ServletException {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">try</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff6ac1">for</span> (ServletContextInitializer initializer : <span style="color:#ff6ac1">this</span>.<span style="color:#57c7ff">initializers</span>) {
+</span></span><span style="display:flex;"><span>            initializer.<span style="color:#57c7ff">onStartup</span>(servletContext);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">catch</span> (Exception ex) {
+</span></span><span style="display:flex;"><span>        ......
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div><p>TomcatStarter的initializers成员变量在前面创建TomcatStarter的时候已经进行了赋值；其中主要的一个initializer是在<code>factory.getWebServer</code>的时候传递的<code>getSelfInitializer()</code>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff5c57">private</span> org.<span style="color:#57c7ff">springframework</span>.<span style="color:#57c7ff">boot</span>.<span style="color:#57c7ff">web</span>.<span style="color:#57c7ff">servlet</span>.<span style="color:#57c7ff">ServletContextInitializer</span> <span style="color:#57c7ff">getSelfInitializer</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">return</span> <span style="color:#ff6ac1">this</span>::selfInitialize;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">private</span> <span style="color:#9aedfe">void</span> <span style="color:#57c7ff">selfInitialize</span>(ServletContext servletContext) <span style="color:#ff5c57">throws</span> ServletException {
+</span></span><span style="display:flex;"><span>    prepareWebApplicationContext(servletContext);
+</span></span><span style="display:flex;"><span>    registerApplicationScope(servletContext);
+</span></span><span style="display:flex;"><span>    WebApplicationContextUtils.<span style="color:#57c7ff">registerEnvironmentBeans</span>(getBeanFactory(), servletContext);
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">for</span> (ServletContextInitializer beans : getServletContextInitializerBeans()) {
+</span></span><span style="display:flex;"><span>        beans.<span style="color:#57c7ff">onStartup</span>(servletContext);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div><p>上面的函数式接口相当于下面的代码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#ff6ac1">new</span> ServletContextInitializer() {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff9f43">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff5c57">public</span> <span style="color:#9aedfe">void</span> <span style="color:#57c7ff">onStartup</span>(ServletContext servletContext) <span style="color:#ff5c57">throws</span> ServletException {
+</span></span><span style="display:flex;"><span>        prepareWebApplicationContext(servletContext);
+</span></span><span style="display:flex;"><span>        registerApplicationScope(servletContext);
+</span></span><span style="display:flex;"><span>        WebApplicationContextUtils.<span style="color:#57c7ff">registerEnvironmentBeans</span>(getBeanFactory(), servletContext);
+</span></span><span style="display:flex;"><span>        <span style="color:#ff6ac1">for</span> (ServletContextInitializer beans : getServletContextInitializerBeans()) {
+</span></span><span style="display:flex;"><span>            beans.<span style="color:#57c7ff">onStartup</span>(servletContext);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div><p>当执行initializer.onStartup的时候就会执行selfInitiailize方法。可以看到在该方法中会获取<code>getServletContextInitializerBeans()</code>。</p>
+<p>在<code>getServletContextInitializerBeans()</code>方法中会查找spring容器中所有类型为<code>ServletContextInitializer</code>的对象。其中包括有：</p>
+<ul>
+<li>
+<p><code>ServletRegistrationBean</code>: 一个用于在 Servlet 3.0+ 容器中注册 Servlet 的 ServletContextInitializer。其功能类似于 ServletContext 提供的注册特性，但采用了对 Spring Bean 友好的设计。<code>DispatcherServletRegistrationBean</code> 就是其中的一个子类，向tomcat中配置DispatcherServlet。</p>
+</li>
+<li>
+<p><code>FilterRegistrationBean</code>: 一个用于在 Servlet 3.0+ 容器中注册过滤器（Filters）的 ServletContextInitializer。其功能类似于 ServletContext 提供的注册特性，但采用了对 Spring Bean 友好的设计。</p>
+</li>
+<li>
+<p><code>DelegatingFilterProxyRegistrationBean</code>: 一个用于在 Servlet 3.0+ 容器中注册 DelegatingFilterProxy 的 ServletContextInitializer。其功能类似于 ServletContext 提供的注册特性，但采用了对 Spring Bean 友好的设计。</p>
+<p>实际委托的 Filter 的 Bean 名称应通过构造函数参数 targetBeanName 指定。与 FilterRegistrationBean 不同，此处引用的过滤器不会被提前实例化。事实上，如果委托的过滤器 Bean 被标记为 @Lazy，那么它将完全不会被实例化，直到该过滤器被实际调用时才会创建。</p>
+</li>
+<li>
+<p><code>ServletListenerRegistrationBean</code>: 一个用于在 Servlet 3.0+ 容器中注册事件监听器（EventListeners）的 ServletContextInitializer。其功能类似于 ServletContext 提供的注册特性，但采用了对 Spring Bean 友好的设计。</p>
+</li>
+<li>
+<p><code>ServletContextInitializer</code>: 该接口用于以编程方式配置 Servlet 3.0+ 的上下文。与 WebApplicationInitializer 不同，实现此接口的类（且未同时实现 WebApplicationInitializer）不会被 SpringServletContainerInitializer 自动检测到，因此也不会被 Servlet 容器自动启动引导。</p>
+</li>
+</ul>
+<p>通过调试可以看到获取到的实例对象，这些都是通过自动配置加载到容器中的。
+<img src="/assets/servlet-context-initializer-beans.png" alt="" /></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+<div>
+
+</div>
+
+<div>
+
+  <a class="flex align-center" href="https://github.com/alex-shpak/hugo-book/edit/main/exampleSite/content/docs/example/spring-boot/Spring%20Boo%E4%B8%ADembed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.md" target="_blank" rel="noopener edit">
+    <img src="/icons/edit.svg" class="book-icon" alt="Edit" />
+    <span>Edit this page</span>
+  </a>
+
+</div>
+
+</div>
+
+
+
+
+
+  
+  
+  
+  <div class="flex flex-wrap justify-between">
+    <span>
+    
+      <a href="/docs/example/spring-boot/spring-boot%E4%B9%8Bdispatcherhandler%E5%88%86%E6%9E%90%E4%B8%8Egateway%E5%AE%9E%E7%8E%B0/" class="flex align-center">
+        <img src="/icons/backward.svg" class="book-icon" alt="Backward" />
+        <span>Spring Boot之DispatcherHandler分析与Gateway实现</span>
+      </a>
+    
+    </span>
+    <span>
+    
+      <a href="/docs/example/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/" class="flex align-center">
+        <span>Spring Boot 对于Aop 的解析原理和@Transactional注解解析原理</span>
+        <img src="/icons/forward.svg" class="book-icon" alt="Forward" />
+      </a>
+    
+    </span>
+  </div>
+  
+
+
+ 
+        
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+        
+        
+  
+ 
+        
+  
+  
+    <script>(function(){document.querySelectorAll("pre:has(code)").forEach(e=>{e.addEventListener("click",e.focus),e.addEventListener("copy",function(t){if(t.preventDefault(),navigator.clipboard){const t=window.getSelection().toString()||e.textContent;navigator.clipboard.writeText(t)}})})})()</script>
+  
+
+      </footer>
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+  
+  <aside class="book-toc">
+    <div class="book-toc-content">
+      
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#spring-boo中embed-tomcat的加载流程分析">Spring Boo中embed tomcat的加载流程分析</a>
+      <ul>
+        <li><a href="#启动一个tomcat的示例代码">启动一个Tomcat的示例代码</a></li>
+        <li><a href="#spring-boot中tomcat的创建过程">Spring Boot中tomcat的创建过程</a></li>
+        <li><a href="#servletcontextinitializer拓展">ServletContextInitializer拓展</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+    </div>
+  </aside>
+  
+ 
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

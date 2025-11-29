@@ -34,7 +34,7 @@ public Object proceed() throws Throwable { // We start with an index of -1 and i
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:url" content="https://itaiit.github.io/docs/example/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/">
   <meta property="og:site_name" content="itaiit’s site">
-  <meta property="og:title" content="spring boot 对于Aop 的解析原理和@Transactional注解解析原理">
+  <meta property="og:title" content="Spring Boot 对于Aop 的解析原理和@Transactional注解解析原理">
   <meta property="og:description" content="spring boot 对于Aop 的解析原理和@Transactional注解解析原理# 首先当我们在spring boot中要启用aop的时候需要添加下面的依赖：
 &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-aop&lt;/artifactId&gt; &lt;/dependency&gt;在spring boot的配置类中预置了aop的自动配置类：AopAutoConfiguration，自动配置类会检测类路径下是否有Advice类来决定是否开启动态代理。默认开启的是Cglib动态代理，并且已经声明了注解@EnableAspectJAutoProxy，因此我们在启动类上面无需再声明。
 我们来看一下@EnableAspectJAutoProxy注解的定义：
@@ -61,7 +61,7 @@ public Object proceed() throws Throwable { // We start with an index of -1 and i
     <meta property="article:section" content="docs">
 
 
-  <meta itemprop="name" content="spring boot 对于Aop 的解析原理和@Transactional注解解析原理">
+  <meta itemprop="name" content="Spring Boot 对于Aop 的解析原理和@Transactional注解解析原理">
   <meta itemprop="description" content="spring boot 对于Aop 的解析原理和@Transactional注解解析原理# 首先当我们在spring boot中要启用aop的时候需要添加下面的依赖：
 &lt;dependency&gt; &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; &lt;artifactId&gt;spring-boot-starter-aop&lt;/artifactId&gt; &lt;/dependency&gt;在spring boot的配置类中预置了aop的自动配置类：AopAutoConfiguration，自动配置类会检测类路径下是否有Advice类来决定是否开启动态代理。默认开启的是Cglib动态代理，并且已经声明了注解@EnableAspectJAutoProxy，因此我们在启动类上面无需再声明。
 我们来看一下@EnableAspectJAutoProxy注解的定义：
@@ -85,7 +85,7 @@ jdk动态代理生成的代理对象对应的代理类是JdkDynamicAopProxy，�
 public Object proceed() throws Throwable { // We start with an index of -1 and increment early. if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) { return invokeJoinpoint(); } Object interceptorOrInterceptionAdvice = this.interceptorsAndDynamicMethodMatchers.get(&#43;&#43;this.currentInterceptorIndex); if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) { // Evaluate dynamic method matcher here: static part will already have // been evaluated and found to match. InterceptorAndDynamicMethodMatcher dm = (InterceptorAndDynamicMethodMatcher) interceptorOrInterceptionAdvice; Class&lt;?&gt; targetClass = (this.targetClass != null ? this.targetClass : this.method.getDeclaringClass()); if (dm.methodMatcher.matches(this.method, targetClass, this.arguments)) { return dm.interceptor.invoke(this); } else { // Dynamic matching failed. // Skip this interceptor and invoke the next in the chain. return proceed(); } } else { // It&#39;s an interceptor, so we just invoke it: The pointcut will have // been evaluated statically before this object was constructed. return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this); } }在上面的代码中List集合interceptorsAndDynamicMethodMatchers中保存的就是切面对应的方法拦截器，每次执行proceed方法的时候，下标会&#43;1从而获取下一个拦截器进行调用。我们看到在拦截器调用的时候，传递的参数是this。要想责任链执行下去，在方法拦截器中就需要调用MethodInvocation的proceed方法。">
   <meta itemprop="wordCount" content="444">
 
-<title>spring boot 对于Aop 的解析原理和@Transactional注解解析原理 | itaiit’s site</title>
+<title>Spring Boot 对于Aop 的解析原理和@Transactional注解解析原理 | itaiit’s site</title>
 <link rel="icon" href="/favicon.png" >
 <link rel="manifest" href="/manifest.json">
 <link rel="canonical" href="https://itaiit.github.io/docs/example/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/">
@@ -93,7 +93,7 @@ public Object proceed() throws Throwable { // We start with an index of -1 and i
 
 
   <script defer src="/fuse.min.js"></script>
-  <script defer src="/en.search.min.cdf0d5a3d5ad3aca52a9349670dcd545f11eaeac3b1f3947958bee70fdf41972.js" integrity="sha256-zfDVo9WtOspSqTSWcNzVRfEerqw7HzlHlYvucP30GXI=" crossorigin="anonymous"></script>
+  <script defer src="/en.search.min.eed5ca01d8ec24b0dd6cbb9138d0504369edfd11dc6786956ca2831d8486cd23.js" integrity="sha256-7tXKAdjsJLDdbLuRONBQQ2nt/RHcZ4aVbKKDHYSGzSM=" crossorigin="anonymous"></script>
 
   <script defer src="/sw.min.6f6f90fcb8eb1c49ec389838e6b801d0de19430b8e516902f8d75c3c8bd98739.js" integrity="sha256-b2&#43;Q/LjrHEnsOJg45rgB0N4ZQwuOUWkC&#43;NdcPIvZhzk=" crossorigin="anonymous"></script>
 
@@ -208,8 +208,36 @@ public Object proceed() throws Throwable { // We start with an index of -1 and i
   
 
   
+    <a href="/docs/example/spring-boot/spring-boo%E4%B8%ADembed-tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" class="">
+      Spring Boo中embed tomcat的加载流程分析</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
     <a href="/docs/example/spring-boot/spring-boot-%E5%AF%B9%E4%BA%8Eaop-%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86/" class="active">
-      spring boot 对于Aop 的解析原理和@Transactional注解解析原理</a>
+      Spring Boot 对于Aop 的解析原理和@Transactional注解解析原理</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/example/spring-boot/spring-boot%E4%B8%AD%E7%9A%84%E5%B7%A5%E5%85%B7%E7%B1%BB-propertymapper/" class="">
+      Spring Boot中的工具类-PropertyMapper</a>
   
 
         </li>
@@ -575,7 +603,7 @@ public Object proceed() throws Throwable { // We start with an index of -1 and i
     <img src="/icons/menu.svg" class="book-icon" alt="Menu" />
   </label>
 
-  <h3>spring boot 对于Aop 的解析原理和@Transactional注解解析原理</h3>
+  <h3>Spring Boot 对于Aop 的解析原理和@Transactional注解解析原理</h3>
 
   <label for="toc-control">
     
@@ -864,16 +892,16 @@ public Object proceed() throws Throwable { // We start with an index of -1 and i
   <div class="flex flex-wrap justify-between">
     <span>
     
-      <a href="/docs/example/spring-boot/spring-boot%E4%B9%8Bdispatcherhandler%E5%88%86%E6%9E%90%E4%B8%8Egateway%E5%AE%9E%E7%8E%B0/" class="flex align-center">
+      <a href="/docs/example/spring-boot/spring-boo%E4%B8%ADembed-tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" class="flex align-center">
         <img src="/icons/backward.svg" class="book-icon" alt="Backward" />
-        <span>Spring Boot之DispatcherHandler分析与Gateway实现</span>
+        <span>Spring Boo中embed tomcat的加载流程分析</span>
       </a>
     
     </span>
     <span>
     
-      <a href="/docs/example/table-of-contents/" class="flex align-center">
-        <span>Table of Contents</span>
+      <a href="/docs/example/spring-boot/spring-boot%E4%B8%AD%E7%9A%84%E5%B7%A5%E5%85%B7%E7%B1%BB-propertymapper/" class="flex align-center">
+        <span>Spring Boot中的工具类-PropertyMapper</span>
         <img src="/icons/forward.svg" class="book-icon" alt="Forward" />
       </a>
     
