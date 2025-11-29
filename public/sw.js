@@ -51,8 +51,8 @@ const pages = [
   "/docs/shortcodes/katex/",
   "/showcases/",
   "/book.min.cc2c524ed250aac81b23d1f4af87344917b325208841feca0968fe450f570575.css",
-  "/en.search-data.min.36eeed35e24e6edb1ae3e53f78153b5bc66a0ba8a725dce1b5bca61c9172b781.json",
-  "/en.search.min.eed5ca01d8ec24b0dd6cbb9138d0504369edfd11dc6786956ca2831d8486cd23.js",
+  "/en.search-data.min.bba4380bb259754d9b3068a7e5226c72bfe6cc4196942058ea5cc322b7a66633.json",
+  "/en.search.min.548e0a397bbc874d14ba736e1d68c59c55eb62eddb0c4a61bdb7891ecd5c1c00.js",
   
 ];
 
