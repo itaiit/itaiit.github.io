@@ -14,7 +14,7 @@ release = '0.1'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = ['myst_parser']
 
 templates_path = ['_templates']
 exclude_patterns = []
@@ -24,5 +24,15 @@ exclude_patterns = []
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'furo'
+html_theme = 'traditional'
+
 html_static_path = ['_static']
+
+html_css_files = [
+    'custom.css',
+]
+
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
