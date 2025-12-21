@@ -5,16 +5,13 @@
 
 Lumache documentation
 =====================
-Check out the :doc:`usage` section for further information.
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+.. note::
 
+   This project is under active development.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
-   
-   usage
+
+   springboot/index
 

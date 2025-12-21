@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>对于Aop的解析原理和@Transactional注解解析原理 &#8212; Notebook 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8e8a900e" />
+    <link rel="stylesheet" type="text/css" href="../_static/traditional.css?v=f6356284" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=4eb2f63a" />
+    <script src="../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Web服务器的启动流程分析" href="Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html" />
+    <link rel="prev" title="embed tomcat的加载流程分析" href="embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html" title="Web服务器的启动流程分析"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html" title="embed tomcat的加载流程分析"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Notebook 0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">springboot</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">对于Aop的解析原理和&#64;Transactional注解解析原理</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="aop-transactional">
+<h1>对于Aop的解析原理和&#64;Transactional注解解析原理<a class="headerlink" href="#aop-transactional" title="Link to this heading">¶</a></h1>
+<p>首先当我们在spring boot中要启用aop的时候需要添加下面的依赖：</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;dependency&gt;</span>
+<span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+<span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-aop<span class="nt">&lt;/artifactId&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</pre></div>
+</div>
+<p>在spring boot的配置类中预置了aop的自动配置类：<code class="docutils literal notranslate"><span class="pre">AopAutoConfiguration</span></code>，自动配置类会检测类路径下是否有Advice类来决定是否开启动态代理。默认开启的是Cglib动态代理，并且已经声明了注解<code class="docutils literal notranslate"><span class="pre">&#64;EnableAspectJAutoProxy</span></code>，因此我们在启动类上面无需再声明。</p>
+<p>我们来看一下<code class="docutils literal notranslate"><span class="pre">&#64;EnableAspectJAutoProxy</span></code>注解的定义：</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Import</span><span class="p">(</span><span class="n">AspectJAutoProxyRegistrar</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="nd">@interface</span><span class="w"> </span><span class="n">EnableAspectJAutoProxy</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>可以看到该注解上面通过<code class="docutils literal notranslate"><span class="pre">&#64;Import</span></code>的方式引入了<code class="docutils literal notranslate"><span class="pre">AspectJAutoProxyRegistrar</span></code>配置。在<code class="docutils literal notranslate"><span class="pre">AspectJAutoProxyRegistrar</span></code>配置中，会通过编程式的方式动态的将<code class="docutils literal notranslate"><span class="pre">AnnotationAwareAspectJAutoProxyCreator</span></code>类注入到spring容器中，注入的beanName为<code class="docutils literal notranslate"><span class="pre">org.springframework.aop.config.internalAutoProxyCreator</span></code>。如果使用的Cglib动态代理的话（也就是proxyTargetClass=true）,则会额外给beanDefinition添加proxyTargetClass属性为true。</p>
+<section id="annotationawareaspectjautoproxycreator">
+<h2>AnnotationAwareAspectJAutoProxyCreator解析<a class="headerlink" href="#annotationawareaspectjautoproxycreator" title="Link to this heading">¶</a></h2>
+<p>根据上面的理解，我们开启aop之后会向spring容器中添加<code class="docutils literal notranslate"><span class="pre">AnnotationAwareAspectJAutoProxyCreator</span></code>实例，接下来我们先来看一下这个类的继承结构：</p>
+<p><img alt="" src="../_images/Snipaste_2025-05-20_14-22-14-1024x926.png" /></p>
+<p>我们知道在spring程序启动完成之后，我们就能从spring容器中拿到对应的代理对象，根据我们之前手动使用jdk或者Cglib创建动态代理的流程，首先需要的是要创建一个被代理的对象，然后再使用动态代理技术进行封装。</p>
+<p>按照这个理解在spring实例化bean的生命周期中，当创建完成bean对象并给bean设置完属性值之后我们就得到了一个被代理的对象，接着会执行一些生命周期方法：</p>
+<p><img alt="" src="../_images/Snipaste_2025-05-20_14-28-40-1024x824.png" /></p>
+<p>结合前面<code class="docutils literal notranslate"><span class="pre">AnnotationAwareAspectJAutoProxyCreator</span></code>类的继承结构和生命周期方法的调用，我们发现<code class="docutils literal notranslate"><span class="pre">AnnotationAwareAspectJAutoProxyCreator</span></code>类也是一个<code class="docutils literal notranslate"><span class="pre">BeanPostProcessor</span></code>，经过调试之后，定位到他的postProcessAfterInitialization方法。</p>
+</section>
+<section id="postprocessafterinitialization">
+<h2>postProcessAfterInitialization<a class="headerlink" href="#postprocessafterinitialization" title="Link to this heading">¶</a></h2>
+<p>我们先来看方法的大致执行流程，如下图：</p>
+<p><img alt="img" src="../_images/aop-0.png" /></p>
+<p>在方法执行的时候，会根据beanName检查earlyProxyReferences中是否存在代理的bean对象，如果不存在，则执行生成代理的流程。最后会将生成的代理对象进行缓存。</p>
+<p>上图中的主要逻辑则集中在第4和6步中，即首先需要查找到当前的bean对象匹配到的是哪个切面然后才能通过动态代理将切面的逻辑进行织入。</p>
+<section id="id1">
+<h3>查找匹配的切面<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>要查找当前的bean实例匹配哪个切面，首先需要获取程序中定义的所有的切面，然后再进行匹配。我们来看下面的执行流程：</p>
+<p><img alt="img" src="../_images/aop2-1-1024x521.png" /></p>
+<p>在第4步中，只有当第一个bean实例化的时候会执行一次。通过获取到容器中所有的beanName，然后进行遍历，判断beanName对应的Class类对象上面是否有&#64;Aspect注解，如果有&#64;Aspect注解则将此类进行缓存，最终会的到我们定义的所有的&#64;Advice类。</p>
+<p>遍历获得到的切面对应的切点规则，与当前bean对象的每个方法进行匹配，看是否有匹配pointCut的方法，如果匹配到了方法，则说明需要使用这个切面进行织入，最终获得到所有应该织入当前bean对象的切面的集合。
+<em><strong>在此我们可以了解到，当系统中定义了越多的切面，则程序启动会越慢，每多增加一个切面会多一次循环调用</strong></em>。</p>
+</section>
+<section id="id2">
+<h3>创建代理对象<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<p>针对于上面获得到的切面集合都需要将对应的逻辑织入到当前bean对象，接下来就是使用切面生成代理对象。</p>
+<p>spring使用org.springframework.aop.framework.ProxyFactory代理工厂类来创建代理对象。默认实现是DefaultAopProxyFactory，通过代理工厂创建出代理JdkDynamicAopProxy或者ObjenesisCglibAopProxy。</p>
+</section>
+<section id="id3">
+<h3>收到请求后执行代理逻辑<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<p>在应用启动完成之后，自动注入的地方也使用代理对象进行了注入。我们使用JDK动态代理来分析，这也是默认的代理方式。</p>
+<p>jdk动态代理生成的代理对象对应的代理类是JdkDynamicAopProxy，因此当调用方法的时候，首先会调用该类的invoke方法。在该方法中会遍历我们定义的每一个切面规则（Advisor=pointCut+Advice）；使用切点的classFilter来判断切面规则是否匹配当前类。如果匹配到当前类，则再进行方法的匹配。</p>
+<p>上述匹配都测试通过之后，则表示当前切面规则应该被织入方法的执行流程中。此时会通过<em>AdvisorAdapterRegistry进行适配，将当前遍历Advisor适配成方法拦截器MethodInterceptor。例如我们定义了一个前置通知&#64;Before，对应的是MethodBeforeAdvice，则会适配成MethodBeforeAdviceInterceptor</em>。当遍历Advisor完成之后，最终会生成一个MethodInterceptor的集合。</p>
+<p>随后将方法拦截器通过ReflectiveMethodInvocation构造成责任链来调用。</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="nf">proceed</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Throwable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">	</span><span class="c1">// We start with an index of -1 and increment early.</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">currentInterceptorIndex</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">interceptorsAndDynamicMethodMatchers</span><span class="p">.</span><span class="na">size</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">invokeJoinpoint</span><span class="p">();</span>
+<span class="w">	</span><span class="p">}</span>
+
+<span class="w">	</span><span class="n">Object</span><span class="w"> </span><span class="n">interceptorOrInterceptionAdvice</span><span class="w"> </span><span class="o">=</span>
+<span class="w">			</span><span class="k">this</span><span class="p">.</span><span class="na">interceptorsAndDynamicMethodMatchers</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="o">++</span><span class="k">this</span><span class="p">.</span><span class="na">currentInterceptorIndex</span><span class="p">);</span>
+<span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">interceptorOrInterceptionAdvice</span><span class="w"> </span><span class="k">instanceof</span><span class="w"> </span><span class="n">InterceptorAndDynamicMethodMatcher</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="c1">// Evaluate dynamic method matcher here: static part will already have</span>
+<span class="w">		</span><span class="c1">// been evaluated and found to match.</span>
+<span class="w">		</span><span class="n">InterceptorAndDynamicMethodMatcher</span><span class="w"> </span><span class="n">dm</span><span class="w"> </span><span class="o">=</span>
+<span class="w">				</span><span class="p">(</span><span class="n">InterceptorAndDynamicMethodMatcher</span><span class="p">)</span><span class="w"> </span><span class="n">interceptorOrInterceptionAdvice</span><span class="p">;</span>
+<span class="w">		</span><span class="n">Class</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="n">targetClass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">targetClass</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">targetClass</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">getDeclaringClass</span><span class="p">());</span>
+<span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dm</span><span class="p">.</span><span class="na">methodMatcher</span><span class="p">.</span><span class="na">matches</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">,</span><span class="w"> </span><span class="n">targetClass</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">arguments</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">			</span><span class="k">return</span><span class="w"> </span><span class="n">dm</span><span class="p">.</span><span class="na">interceptor</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<span class="w">		</span><span class="p">}</span>
+<span class="w">		</span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">			</span><span class="c1">// Dynamic matching failed.</span>
+<span class="w">			</span><span class="c1">// Skip this interceptor and invoke the next in the chain.</span>
+<span class="w">			</span><span class="k">return</span><span class="w"> </span><span class="n">proceed</span><span class="p">();</span>
+<span class="w">		</span><span class="p">}</span>
+<span class="w">	</span><span class="p">}</span>
+<span class="w">	</span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="c1">// It&#39;s an interceptor, so we just invoke it: The pointcut will have</span>
+<span class="w">		</span><span class="c1">// been evaluated statically before this object was constructed.</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="p">((</span><span class="n">MethodInterceptor</span><span class="p">)</span><span class="w"> </span><span class="n">interceptorOrInterceptionAdvice</span><span class="p">).</span><span class="na">invoke</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<span class="w">	</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>在上面的代码中List集合interceptorsAndDynamicMethodMatchers中保存的就是切面对应的方法拦截器，每次执行proceed方法的时候，下标会+1从而获取下一个拦截器进行调用。我们看到在拦截器调用的时候，传递的参数是this。要想责任链执行下去，在方法拦截器中就需要调用MethodInvocation的proceed方法。</p>
+</section>
+</section>
+<section id="transactional">
+<h2>单机事务&#64;Transactional注解<a class="headerlink" href="#transactional" title="Link to this heading">¶</a></h2>
+<p>在spring中我们使用&#64;Transactional注解可以很容易的让我们的bean中操作数据库的方法来开启事务操作。那它是怎么实现的呢？</p>
+<p>&#64;Transactional注解在spring-tx包下面，全路径是<code class="docutils literal notranslate"><span class="pre">org.springframework.transaction.annotation.Transactional</span></code>。我们来看spring boot中预置的事务自动配置类：<code class="docutils literal notranslate"><span class="pre">TransactionAutoConfiguration</span></code>和<code class="docutils literal notranslate"><span class="pre">DataSourceTransactionManagerAutoConfiguration</span></code>。<code class="docutils literal notranslate"><span class="pre">DataSourceTransactionManagerAutoConfiguration</span></code>配置类在<code class="docutils literal notranslate"><span class="pre">TransactionAutoConfiguration</span></code>之前完成自动配置，先完成事务管理器的自动配置，而在<code class="docutils literal notranslate"><span class="pre">TransactionAutoConfiguration</span></code>类中则会声明事务管理器代理的两种方式：<em>jdk动态代理</em>和<em>cglib动态代理</em>。默认使用cglib动态代理。</p>
+<p><img alt="img" src="../_images/Snipaste_2025-05-21_23-34-15-1024x443.png" /></p>
+<p>我们查看<code class="docutils literal notranslate"><span class="pre">&#64;EnableTransactionManagement</span></code>注解，发现该注解通过import的方式导入了<code class="docutils literal notranslate"><span class="pre">TransactionManagementConfigurationSelector</span></code>配置。在配置类中会判断<code class="docutils literal notranslate"><span class="pre">&#64;EnableTransactionManagement</span></code>注解的mode值，默认是PROXY，此时会向容器中加载<code class="docutils literal notranslate"><span class="pre">AutoProxyRegistrar</span></code>和<code class="docutils literal notranslate"><span class="pre">ProxyTransactionManagementConfiguration</span></code>两个配置。</p>
+<p>我们重点来看<code class="docutils literal notranslate"><span class="pre">ProxyTransactionManagementConfiguration</span></code>配置类，在该类中主要声明的是</p>
+<ul class="simple">
+<li><p>事务管理器的切面：BeanFactoryTransactionAttributeSourceAdvisor，该类继承自aop的拓展类AbstractBeanFactoryPointcutAdvisor，并提供了针对于事务的pointCut实现。</p></li>
+<li><p>MethodInterceptor方法拦截器的实现：TransactionInterceptor，该类实现了MethodInterceptor方法拦截器</p></li>
+</ul>
+<p>在上面查找匹配的切面的流程图中，在第2步会从spring容器中读取所有Advisor类型的bean。因此当定义了事务管理器的切面BeanFactoryTransactionAttributeSourceAdvisor之后，也是能够被读取到。最终和我们定义的&#64;Aspect切面一样发挥作用。</p>
+<p>我们知道Advisor是<em>通知+切点</em>的组合，判断Advisor是否要代理某个bean，需要经过两个步骤的判断：</p>
+<p><strong>1.满足Advisor中pointCut的classFliter过滤</strong></p>
+<p>在事务管理器的pointCut中对应的classFilter是<code class="docutils literal notranslate"><span class="pre">TransactionAttributeSourceClassFilter</span></code>，我们查看它的<code class="docutils literal notranslate"><span class="pre">matchs</span></code>方法：</p>
+<p><img alt="img" src="../_images/Snipaste_2025-05-22_00-12-08-1024x430.png" /></p>
+<p>在这里tas变量获取到的是<code class="docutils literal notranslate"><span class="pre">AnnotationTransactionAttributeSource</span></code>，在该类中会去遍历TransactionAnnotationParser集合与当前实例化的bean的class进行匹配，其中有一个TransactionAnnotationParser的实现类是SpringTransactionAnnotationParser。</p>
+<p><strong>2.满足Advisor中pointCut的MethodMatch的匹配</strong></p>
+<p>在ClassFilter过滤通过之后，会进一步通过MethodMatch来进行匹配。在MethodMatch中，会判断当前方法上面是否有&#64;Transaction注解，如果没有的话会再次判断类上面是否有该注解。如果找到了&#64;Transaction注解则匹配通过，表示当前bean需要被代理。</p>
+</section>
+<section id="aop">
+<h2>实战自定义AOP逻辑<a class="headerlink" href="#aop" title="Link to this heading">¶</a></h2>
+<p>在上面我们了解了aop的初始化逻辑和代理对象的执行逻辑之后，下面我们来自定义一个注解，完成类似于事务注解&#64;Transactional的运行方式。</p>
+<p>自定义的逻辑是：我们定义一个日志的aop，当执行的方法上有&#64;LogToEs注解标注的时候，执行会被我们的aop拦截来完成日志的记录，可以使将日志信息输送到ES或者其他地方。</p>
+<p>1.<strong>定义自动配置类，并&#64;Import配置类</strong></p>
+<p>我们自定义一个自动配置注解&#64;EnableLogManagement用来全局开启配置，然后定义一个&#64;LogToEs注解。</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Target</span><span class="p">(</span><span class="n">ElementType</span><span class="p">.</span><span class="na">TYPE</span><span class="p">)</span>
+<span class="nd">@Retention</span><span class="p">(</span><span class="n">RetentionPolicy</span><span class="p">.</span><span class="na">RUNTIME</span><span class="p">)</span>
+<span class="nd">@Documented</span>
+<span class="nd">@Import</span><span class="p">(</span><span class="n">LogManagementConfigurationSelector</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="nd">@interface</span><span class="w"> </span><span class="n">EnableLogManagement</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">AdviceMode</span><span class="w"> </span><span class="nf">mode</span><span class="p">()</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="n">AdviceMode</span><span class="p">.</span><span class="na">PROXY</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nd">@Target</span><span class="p">({</span><span class="n">ElementType</span><span class="p">.</span><span class="na">TYPE</span><span class="p">,</span><span class="w"> </span><span class="n">ElementType</span><span class="p">.</span><span class="na">METHOD</span><span class="p">})</span>
+<span class="nd">@Retention</span><span class="p">(</span><span class="n">RetentionPolicy</span><span class="p">.</span><span class="na">RUNTIME</span><span class="p">)</span>
+<span class="nd">@Inherited</span>
+<span class="nd">@Documented</span>
+<span class="kd">public</span><span class="w"> </span><span class="nd">@interface</span><span class="w"> </span><span class="n">LogToEs</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>2.完成配置类LogManagementConfigurationSelector的逻辑</strong></p>
+<p>我们在自动配置注解上面通过&#64;Import的方式导入了LogManagementConfigurationSelector配置类，在这个类中，我们会定义一个Advisor。
+因为在程序启动的时候，aop会先加载程序中所有的Advisor的bean，在这里我们可以继承AbstractBeanFactoryPointcutAdvisor，来使我们的配置类是一个Advisor。</p>
+<p>我们从上面的分析了解到Advisor是Advice和pointCut的组合，此时我们还需要定义一个pointCut和Advice。</p>
+<p><strong>3.定义切点和通知</strong></p>
+<p>在我们继承了AbstractBeanFactoryPointcutAdvisor类之后，需要重写getPointcut方法，也就是需要我们提供一个切点，我们的切入逻辑是判断方法上面有没有&#64;LogToEs注解，因此在这里使用的是StaticMethodMatcherPointcut的实现：</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Pointcut</span><span class="w"> </span><span class="nf">getPointcut</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 只匹配方法的签名，而不关心方法在运行期的参数</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">StaticMethodMatcherPointcut</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nd">@Override</span>
+<span class="w">            </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">matches</span><span class="p">(</span><span class="n">Method</span><span class="w"> </span><span class="n">method</span><span class="p">,</span><span class="w"> </span><span class="n">Class</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="n">targetClass</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">method</span><span class="p">.</span><span class="na">getAnnotation</span><span class="p">(</span><span class="n">LogToEs</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">};</span>
+<span class="w">    </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>随后我们定义一个通知Advice。在aop中，每一个通知最终都会被适配为方法拦截器。我们可以来看下前置通知：</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">MethodBeforeAdviceInterceptor</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">MethodInterceptor</span><span class="p">,</span><span class="w"> </span><span class="n">BeforeAdvice</span><span class="p">,</span><span class="w"> </span><span class="n">Serializable</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">	</span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">MethodBeforeAdvice</span><span class="w"> </span><span class="n">advice</span><span class="p">;</span>
+<span class="w">        </span><span class="p">......</span>
+<span class="w">	</span><span class="nd">@Override</span>
+<span class="w">	</span><span class="nd">@Nullable</span>
+<span class="w">	</span><span class="kd">public</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="nf">invoke</span><span class="p">(</span><span class="n">MethodInvocation</span><span class="w"> </span><span class="n">mi</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Throwable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">		</span><span class="k">this</span><span class="p">.</span><span class="na">advice</span><span class="p">.</span><span class="na">before</span><span class="p">(</span><span class="n">mi</span><span class="p">.</span><span class="na">getMethod</span><span class="p">(),</span><span class="w"> </span><span class="n">mi</span><span class="p">.</span><span class="na">getArguments</span><span class="p">(),</span><span class="w"> </span><span class="n">mi</span><span class="p">.</span><span class="na">getThis</span><span class="p">());</span>
+<span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="n">mi</span><span class="p">.</span><span class="na">proceed</span><span class="p">();</span>
+<span class="w">	</span><span class="p">}</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>可以看到在invoke的调用中，在执行实际方法之前调用了advice的before的方法执行前置的逻辑。
+我们可以直接实现方法拦截器接口MethodInterceptor，在里面实现我们的逻辑即可：</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">LogInterceptor</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">MethodInterceptor</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="nf">invoke</span><span class="p">(</span><span class="n">MethodInvocation</span><span class="w"> </span><span class="n">invocation</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Throwable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 在这里添加日志记录逻辑</span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;invocation.getArguments() = &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">invocation</span><span class="p">.</span><span class="na">getArguments</span><span class="p">());</span>
+<span class="w">        </span><span class="n">Object</span><span class="w"> </span><span class="n">proceed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">invocation</span><span class="p">.</span><span class="na">proceed</span><span class="p">();</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">proceed</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>这里只是将日志打印到了控制台中。在完成上面两个组件的定义之后，就可以创建我们的Advisor bean了：</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Configuration</span>
+<span class="nd">@Role</span><span class="p">(</span><span class="n">BeanDefinition</span><span class="p">.</span><span class="na">ROLE_INFRASTRUCTURE</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">LogManagementConfiguration</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">AbstractLogManagement</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Bean</span>
+<span class="w">    </span><span class="nd">@Role</span><span class="p">(</span><span class="n">BeanDefinition</span><span class="p">.</span><span class="na">ROLE_INFRASTRUCTURE</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">LogManagementAdvisor</span><span class="w"> </span><span class="nf">logManagementAdvisor</span><span class="p">(</span><span class="n">LogInterceptor</span><span class="w"> </span><span class="n">logInterceptor</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LogManagementAdvisor</span><span class="w"> </span><span class="n">logManagementAdvisor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LogManagementAdvisor</span><span class="p">();</span>
+<span class="w">        </span><span class="n">logManagementAdvisor</span><span class="p">.</span><span class="na">setAdvice</span><span class="p">(</span><span class="n">logInterceptor</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">logManagementAdvisor</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Bean</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">LogInterceptor</span><span class="w"> </span><span class="nf">logInterceptor</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LogInterceptor</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>在创建Advisor的时候通过setAdvice方法，将我们的拦截器添加进去即可。</p>
+<p>这里需要注意的是&#64;Role(BeanDefinition.ROLE_INFRASTRUCTURE)注解，<code class="docutils literal notranslate"><span class="pre">BeanDefinition.ROLE_INFRASTRUCTURE</span></code> 的作用是<strong>标识Bean为Spring框架内部的基础设施组件</strong>，而非用户直接使用的业务Bean。在识别Advisor的时候，也会判断BeanDefinition中的role是否为<code class="docutils literal notranslate"><span class="pre">INFRASTRUCTURE</span></code>。</p>
+</section>
+<section id="spring-aop-api">
+<h2>Spring AOP API的支持<a class="headerlink" href="#spring-aop-api" title="Link to this heading">¶</a></h2>
+<p>spring为每个通知类型都提供了对应的接口，对应关系如下：</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>通知类型</p></th>
+<th class="head"><p>接口名</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Around Advice</p></td>
+<td><p>MethodInterceptor需要自己实现该接口编写环绕逻辑</p></td>
+</tr>
+<tr class="row-odd"><td><p>Before Advice</p></td>
+<td><p>MethodBeforeAdvice</p></td>
+</tr>
+<tr class="row-even"><td><p>Throws Advice</p></td>
+<td><p>ThrowsAdvice</p></td>
+</tr>
+<tr class="row-odd"><td><p>After Returning Advice</p></td>
+<td><p>AfterReturningAdvice</p></td>
+</tr>
+<tr class="row-even"><td><p>Introduction Advice</p></td>
+<td><p>IntroductionInterceptor</p></td>
+</tr>
+</tbody>
+</table>
+<section id="advisor-api">
+<h3>Advisor API<a class="headerlink" href="#advisor-api" title="Link to this heading">¶</a></h3>
+<p>在spring中，<code class="docutils literal notranslate"><span class="pre">advisor</span></code>代表一个<em>只包含一个通知和一个切点表达式</em>的切面。</p>
+<p>除了引入（introductions）这种特殊情况外，任何 <code class="docutils literal notranslate"><span class="pre">Advisor</span></code> 都可以与任何类型的通知（advice）配合使用。<code class="docutils literal notranslate"><span class="pre">org.springframework.aop.support.DefaultPointcutAdvisor</span></code> 是最常用的 <code class="docutils literal notranslate"><span class="pre">Advisor</span></code> 类。它可以与 <code class="docutils literal notranslate"><span class="pre">MethodInterceptor</span></code>、<code class="docutils literal notranslate"><span class="pre">BeforeAdvice</span></code> 或 <code class="docutils literal notranslate"><span class="pre">ThrowsAdvice</span></code> 一起使用。</p>
+<p>在Spring中，可以在同一个AOP代理中混合使用不同类型的 <code class="docutils literal notranslate"><span class="pre">Advisor</span></code> 和通知。例如，在一个代理配置中，你可以同时使用环绕通知（interception around advice）、异常通知（throws advice）和前置通知（before advice）。Spring会自动创建所需的拦截器链（interceptor chain）。</p>
+</section>
+</section>
+<section id="id4">
+<h2>补充<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<section id="id5">
+<h3>核心 AOP 概念<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<p><strong>切面（Aspect）</strong>：横跨多个类的关注点的模块化。事务管理是企业 Java 应用中横切关注点的一个好例子。在 Spring AOP 中，切面可以通过使用普通类（基于 schema 的方法）或使用 &#64;Aspect 注解的普通类（&#64;AspectJ 风格）来实现。</p>
+<p><strong>连接点（Join point）</strong>：程序执行过程中的某个点，例如方法的执行或异常的处理。在 Spring AOP 中，连接点始终代表方法的执行。</p>
+<p><strong>通知（Advice）</strong>：切面在特定连接点执行的动作。不同类型的通知包括”环绕（around）”、”前置（before）”和”后置（after）”通知。（通知类型将在后面讨论。）许多 AOP 框架，包括 Spring，将通知建模为一个拦截器，并在连接点周围维护一个拦截器链。</p>
+<p><strong>切入点（Pointcut）</strong>：匹配连接点的谓词。<em>通知与切入点表达式相关联</em>，并在由切入点匹配的任何连接点运行（例如，执行具有特定名称的方法）。连接点被切入点表达式匹配的概念是 AOP 的核心，Spring 默认使用 AspectJ 切入点表达式语言。</p>
+<p><strong>引入（Introduction）</strong>：代表类型声明额外的方法或字段。Spring AOP 允许你向任何被通知的对象引入新的接口（及相应的实现）。例如，你可以使用引入使 bean 实现 IsModified 接口，以简化缓存。（在 AspectJ 社区中，引入被称为”类型间声明”。）</p>
+<p><strong>目标对象（Target object）</strong>：被一个或多个切面通知的对象。也称为”被通知的对象”。由于 Spring AOP 是通过运行时代理实现的，这个对象总是一个被代理的对象。</p>
+<p><strong>AOP 代理（AOP proxy）</strong>：由 AOP 框架创建的对象，用于实现切面契约（通知方法执行等）。在 Spring 框架中，AOP 代理是 JDK 动态代理或 CGLIB 代理。</p>
+<p><strong>织入（Weaving）</strong>：将切面与其他应用类型或对象链接起来以创建被通知的对象。这可以在编译时（例如使用 AspectJ 编译器）、加载时或运行时完成。Spring AOP 与其他纯 Java AOP 框架一样，在运行时执行织入。</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">对于Aop的解析原理和&#64;Transactional注解解析原理</a><ul>
+<li><a class="reference internal" href="#annotationawareaspectjautoproxycreator">AnnotationAwareAspectJAutoProxyCreator解析</a></li>
+<li><a class="reference internal" href="#postprocessafterinitialization">postProcessAfterInitialization</a><ul>
+<li><a class="reference internal" href="#id1">查找匹配的切面</a></li>
+<li><a class="reference internal" href="#id2">创建代理对象</a></li>
+<li><a class="reference internal" href="#id3">收到请求后执行代理逻辑</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#transactional">单机事务&#64;Transactional注解</a></li>
+<li><a class="reference internal" href="#aop">实战自定义AOP逻辑</a></li>
+<li><a class="reference internal" href="#spring-aop-api">Spring AOP API的支持</a><ul>
+<li><a class="reference internal" href="#advisor-api">Advisor API</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id4">补充</a><ul>
+<li><a class="reference internal" href="#id5">核心 AOP 概念</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html"
+                          title="previous chapter">embed tomcat的加载流程分析</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html"
+                          title="next chapter">Web服务器的启动流程分析</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/springboot/对于Aop的解析原理和@Transactional注解解析原理.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html" title="Web服务器的启动流程分析"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html" title="embed tomcat的加载流程分析"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Notebook 0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >springboot</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">对于Aop的解析原理和&#64;Transactional注解解析原理</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, itaiit.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

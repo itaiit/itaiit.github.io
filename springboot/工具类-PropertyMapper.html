@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>工具类-PropertyMapper &#8212; Notebook 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8e8a900e" />
+    <link rel="stylesheet" type="text/css" href="../_static/traditional.css?v=f6356284" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=4eb2f63a" />
+    <script src="../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="embed tomcat的加载流程分析" href="embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html" />
+    <link rel="prev" title="springboot" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html" title="embed tomcat的加载流程分析"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="springboot"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Notebook 0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">springboot</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">工具类-PropertyMapper</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="propertymapper">
+<h1>工具类-PropertyMapper<a class="headerlink" href="#propertymapper" title="Link to this heading">¶</a></h1>
+<p>在查看Spring Boot源码的时候发现了这样一处代码:</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">customize</span><span class="p">(</span><span class="n">ConfigurableTomcatWebServerFactory</span><span class="w"> </span><span class="n">factory</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">ServerProperties</span><span class="p">.</span><span class="na">Tomcat</span><span class="w"> </span><span class="n">properties</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">serverProperties</span><span class="p">.</span><span class="na">getTomcat</span><span class="p">();</span>
+<span class="w">    </span><span class="n">PropertyMapper</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PropertyMapper</span><span class="p">.</span><span class="na">get</span><span class="p">().</span><span class="na">alwaysApplyingWhenNonNull</span><span class="p">();</span>
+<span class="w">    </span><span class="n">map</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">properties</span><span class="p">::</span><span class="n">getBasedir</span><span class="p">).</span><span class="na">to</span><span class="p">(</span><span class="n">factory</span><span class="p">::</span><span class="n">setBaseDirectory</span><span class="p">);</span>
+<span class="w">    </span><span class="p">......</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>代码路径： <code class="code docutils literal notranslate"><span class="pre">org.springframework.boot.autoconfigure.web.embedded.TomcatWebServerFactoryCustomizer#customize</span></code></p>
+<p>上面代码的应用场景是读取配置文件中关于 <code class="code docutils literal notranslate"><span class="pre">prefix</span> <span class="pre">=</span> <span class="pre">&quot;server&quot;</span></code> 的配置，当值不为空的时候就给工厂类中对应的属性赋值。使用这种方式避免了我们对于大量对于值判断的代码:</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">properties</span><span class="p">.</span><span class="na">getBaseDir</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">factory</span><span class="p">.</span><span class="na">setBaseDirectory</span><span class="p">(</span><span class="n">properties</span><span class="p">.</span><span class="na">getBaseDir</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="p">......</span>
+</pre></div>
+</div>
+<p>根据PropertyMapper类的描述为：一个实用工具，可用于将值从指定的源对象映射到目标对象。主要旨在辅助将 <code class="code docutils literal notranslate"><span class="pre">&#64;ConfigurationProperties</span></code> 中的配置映射到第三方类时使用。</p>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="index.html"
+                          title="previous chapter">springboot</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html"
+                          title="next chapter">embed tomcat的加载流程分析</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/springboot/工具类-PropertyMapper.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html" title="embed tomcat的加载流程分析"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="springboot"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Notebook 0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >springboot</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">工具类-PropertyMapper</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, itaiit.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>
