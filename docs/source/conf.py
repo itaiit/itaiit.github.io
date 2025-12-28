@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Notebook'
+project = "ITAIIT's Notebook"
 copyright = '2025, itaiit'
 author = 'itaiit'
 release = '0.1'
@@ -14,7 +14,9 @@ release = '0.1'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['myst_parser']
+extensions = [
+    'myst_parser'
+    ]
 
 templates_path = ['_templates']
 exclude_patterns = []
@@ -24,7 +26,9 @@ exclude_patterns = []
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'traditional'
+html_theme = 'sphinxawesome_theme'
+
+html_title = "ITAIIT's Notebook"
 
 html_static_path = ['_static']
 

@@ -1,6 +1,6 @@
 # DispatcherHandler分析与Gateway实现
 
-经过前面[对于Spring Boot的Web请求处理流程分析]({{<ref "Spring Boot之Web服务器的启动流程分析.md">}})，我们知道当请求进入服务器之后会被netty的handler处理然后转入spring boot的handler处理逻辑。在reactive类型的web容器场景下，进过spring boot的handler经过了层层的封装，但最核心的则是名为webHandler的实例：DispatcherHandler。下面我们来分析一下该类的结构以及可以进行的拓展。
+经过前面[对于Spring Boot的Web请求处理流程分析](./Web服务器的启动流程分析.md)，我们知道当请求进入服务器之后会被netty的handler处理然后转入spring boot的handler处理逻辑。在reactive类型的web容器场景下，进过spring boot的handler经过了层层的封装，但最核心的则是名为webHandler的实例：DispatcherHandler。下面我们来分析一下该类的结构以及可以进行的拓展。
 
 ## DispatcherHandler处理请求
 
