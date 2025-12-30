@@ -46,7 +46,7 @@ Java 简单日志门面（SLF4J）为各种日志框架（例如 java.util.loggi
 
 我们在mvnrepository中搜索slf4j可以查看到一些Provider和Binding的词条：
 
-![img](https://cdn.nlark.com/yuque/0/2025/png/29440726/1766975740765-dffb2702-34be-45fa-bbcd-15b7cedd5a4e.png)
+![img](../assets/1766975740765-dffb2702-34be-45fa-bbcd-15b7cedd5a4e.png)
 
 这里我们只关注Apache Log4j SLF4J Binding ，点进去任意一个可以看到依赖坐标：
 
@@ -62,7 +62,7 @@ Java 简单日志门面（SLF4J）为各种日志框架（例如 java.util.loggi
 
 再通过Slf4j官网的图来直观感受一下Slf4j所处的位置和作用：
 
-![img](https://cdn.nlark.com/yuque/0/2025/png/29440726/1766976327459-5b1dddb6-a9c9-488c-848d-977cebef9cf8.png)
+![img](../assets/1766976327459-5b1dddb6-a9c9-488c-848d-977cebef9cf8.png)
 
 再加上log4j 2的话，那流程就是：*application-->SLF4J API(slf4j-api.jar)-->Adaptation layer(log4j-slf4j-impl.jar)-->Undering logging framework(log4j-core.jar)。*
 
@@ -70,7 +70,7 @@ Java 简单日志门面（SLF4J）为各种日志框架（例如 java.util.loggi
 
 先来看一下纯净的spring boot的日志依赖，只添加了spring-boot-starter-web:3.2.12依赖：
 
-![img](https://cdn.nlark.com/yuque/0/2025/png/29440726/1766978341799-73aa0ed7-d07b-4a19-a940-4fddd9e425e8.png)
+![img](../assets/1766978341799-73aa0ed7-d07b-4a19-a940-4fddd9e425e8.png)
 
 在依赖中我们看到的是log4j-to-slf4j，那么他和我们之前的*log4j-slf4j-impl*有什么联系呢？
 
@@ -127,7 +127,7 @@ SLF4J(I): Actual provider is of type [ch.qos.logback.classic.spi.LogbackServiceP
 
 出现这个原因是因为我刚刚引入了这个依赖`spring-boot-starter-log4j2`，再来看依赖结构：
 
-![img](https://cdn.nlark.com/yuque/0/2025/png/29440726/1766990824879-e7558e22-4411-4dcd-8525-7c172c6c0050.png)
+![img](../assets/1766990824879-e7558e22-4411-4dcd-8525-7c172c6c0050.png)
 
 此时，依赖项中多出了log4j-core和log4j-slf4j2-impl的依赖。项目中存在logback-classic和**log4j2-core**两种日志框架的实现，所以slf4j会给出这样的提示。如果我们要使用log4j2的实现，排除掉`spring-boot-starter-logging`依赖项即可。
 
