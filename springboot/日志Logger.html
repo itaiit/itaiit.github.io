@@ -124,7 +124,7 @@
 <p>请注意，为您的库或应用程序启用 SLF4J 仅需添加一个必需的依赖项，即 slf4j-api-2.0.17.jar。</p>
 <p>如前所述，SLF4J 旨在作为各种日志框架的门面。SLF4J 的发行版包含多个称为“提供者（provider）”的 JAR 文件，每个提供者对应一个受支持的日志框架。请注意，SLF4J 1.7 及更早版本中使用术语“绑定（binding）”来指代这些提供者。</p>
 <p>我们在mvnrepository中搜索slf4j可以查看到一些Provider和Binding的词条：</p>
-<p><img alt="img" src="https://cdn.nlark.com/yuque/0/2025/png/29440726/1766975740765-dffb2702-34be-45fa-bbcd-15b7cedd5a4e.png" /></p>
+<p><img alt="img" src="../_images/1766975740765-dffb2702-34be-45fa-bbcd-15b7cedd5a4e.png" /></p>
 <p>这里我们只关注Apache Log4j SLF4J Binding ，点进去任意一个可以看到依赖坐标：</p>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="cm">&lt;!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-slf4j-impl --&gt;</span>
 <span class="nt">&lt;dependency&gt;</span>
@@ -136,11 +136,11 @@
 </pre></div>
 </div>
 <p>再通过Slf4j官网的图来直观感受一下Slf4j所处的位置和作用：</p>
-<p><img alt="img" src="https://cdn.nlark.com/yuque/0/2025/png/29440726/1766976327459-5b1dddb6-a9c9-488c-848d-977cebef9cf8.png" /></p>
+<p><img alt="img" src="../_images/1766976327459-5b1dddb6-a9c9-488c-848d-977cebef9cf8.png" /></p>
 <p>再加上log4j 2的话，那流程就是：<em>application–&gt;SLF4J API(slf4j-api.jar)–&gt;Adaptation layer(log4j-slf4j-impl.jar)–&gt;Undering logging framework(log4j-core.jar)。</em></p>
 <p>由此可以看出，应用想要切换日志框架实现的时候，除了<strong>添加对应日志框架的依赖之外，还需要查看是否需要适配层（Adaptation layer）</strong>。</p>
 <p>先来看一下纯净的spring boot的日志依赖，只添加了spring-boot-starter-web:3.2.12依赖：</p>
-<p><img alt="img" src="https://cdn.nlark.com/yuque/0/2025/png/29440726/1766978341799-73aa0ed7-d07b-4a19-a940-4fddd9e425e8.png" /></p>
+<p><img alt="img" src="../_images/1766978341799-73aa0ed7-d07b-4a19-a940-4fddd9e425e8.png" /></p>
 <p>在依赖中我们看到的是log4j-to-slf4j，那么他和我们之前的<em>log4j-slf4j-impl</em>有什么联系呢？</p>
 <table class="docutils align-default">
 <thead>
@@ -197,7 +197,7 @@ SLF4J(I):<span class="w"> </span>Actual<span class="w"> </span>provider<span cla
 </pre></div>
 </div>
 <p>出现这个原因是因为我刚刚引入了这个依赖<code class="docutils literal notranslate"><span class="pre">spring-boot-starter-log4j2</span></code>，再来看依赖结构：</p>
-<p><img alt="img" src="https://cdn.nlark.com/yuque/0/2025/png/29440726/1766990824879-e7558e22-4411-4dcd-8525-7c172c6c0050.png" /></p>
+<p><img alt="img" src="../_images/1766990824879-e7558e22-4411-4dcd-8525-7c172c6c0050.png" /></p>
 <p>此时，依赖项中多出了log4j-core和log4j-slf4j2-impl的依赖。项目中存在logback-classic和<strong>log4j2-core</strong>两种日志框架的实现，所以slf4j会给出这样的提示。如果我们要使用log4j2的实现，排除掉<code class="docutils literal notranslate"><span class="pre">spring-boot-starter-logging</span></code>依赖项即可。</p>
 <section id="spring-boot">
 <h3>在spring boot中自定义日志框架的配置<a class="headerlink" href="#spring-boot" title="Link to this heading"></a></h3>
