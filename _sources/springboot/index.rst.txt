@@ -1,4 +1,4 @@
-springboot
+SpringBoot
 ==========
 
 .. toctree::

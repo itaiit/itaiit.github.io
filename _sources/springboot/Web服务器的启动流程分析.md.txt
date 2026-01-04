@@ -1,4 +1,4 @@
-# Web服务器的启动流程分析
+# Web 服务器的启动流程分析
 ## 如何判断创建哪种web容器：servlet？reactive？
 
 我们在启动Spring Boot程序的时候，会使用SpringApplication.run方法来启动，在启动流程中首先要判断的就是需要启动什么类型的服务器，是servlet？或者是reactive？那么spring boot是如何进行判断的呢？

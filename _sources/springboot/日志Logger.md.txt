@@ -1,4 +1,4 @@
-# 日志Logger-JCL，Slf4j
+# 日志 Logger-JCL, Slf4j
 
 在spring boot logging章节开头有这么一句话：
 

@@ -6,10 +6,10 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Web服务器的启动流程分析 &mdash; ITAIIT&#39;s Notebook</title>
+  <title>Web 服务器的启动流程分析 &mdash; ITAIIT&#39;s Notebook</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=4eb2f63a" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=706144a1" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -20,8 +20,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="DispatcherHandler分析与Gateway实现" href="DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html" />
-    <link rel="prev" title="对于Aop的解析原理和@Transactional注解解析原理" href="%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html" /> 
+    <link rel="next" title="DispatcherHandler 分析与 Gateway 实现" href="DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html" />
+    <link rel="prev" title="分析一下 SpringBoot 的 Aop 的解析和 @Transactional 注解解析原理" href="%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,11 +44,11 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">springboot</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="%E5%B7%A5%E5%85%B7%E7%B1%BB-PropertyMapper.html">工具类-PropertyMapper</a></li>
-<li class="toctree-l2"><a class="reference internal" href="embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html">embed tomcat的加载流程分析</a></li>
-<li class="toctree-l2"><a class="reference internal" href="%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html">对于Aop的解析原理和&#64;Transactional注解解析原理</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Web服务器的启动流程分析</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">SpringBoot</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="%E5%B7%A5%E5%85%B7%E7%B1%BB-PropertyMapper.html">介绍工具类 PropertyMapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html">分析 SpringBoot 中的 embed tomcat 加载流程</a></li>
+<li class="toctree-l2"><a class="reference internal" href="%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html">分析一下 SpringBoot 的 Aop 的解析和 &#64;Transactional 注解解析原理</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Web 服务器的启动流程分析</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#web-servlet-reactive">如何判断创建哪种web容器：servlet？reactive？</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#webservermanager">初始化WebServerManager</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#reactivewebserverfactory">从容器中获取ReactiveWebServerFactory</a></li>
@@ -64,8 +64,8 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html">DispatcherHandler分析与Gateway实现</a></li>
-<li class="toctree-l2"><a class="reference internal" href="%E6%97%A5%E5%BF%97Logger.html">日志Logger-JCL，Slf4j</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html">DispatcherHandler 分析与 Gateway 实现</a></li>
+<li class="toctree-l2"><a class="reference internal" href="%E6%97%A5%E5%BF%97Logger.html">日志 Logger-JCL, Slf4j</a></li>
 </ul>
 </li>
 </ul>
@@ -84,8 +84,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html">springboot</a></li>
-      <li class="breadcrumb-item active">Web服务器的启动流程分析</li>
+          <li class="breadcrumb-item"><a href="index.html">SpringBoot</a></li>
+      <li class="breadcrumb-item active">Web 服务器的启动流程分析</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/springboot/Web服务器的启动流程分析.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -96,7 +96,7 @@
            <div itemprop="articleBody">
              
   <section id="web">
-<h1>Web服务器的启动流程分析<a class="headerlink" href="#web" title="Link to this heading"></a></h1>
+<h1>Web 服务器的启动流程分析<a class="headerlink" href="#web" title="Link to this heading"></a></h1>
 <section id="web-servlet-reactive">
 <h2>如何判断创建哪种web容器：servlet？reactive？<a class="headerlink" href="#web-servlet-reactive" title="Link to this heading"></a></h2>
 <p>我们在启动Spring Boot程序的时候，会使用SpringApplication.run方法来启动，在启动流程中首先要判断的就是需要启动什么类型的服务器，是servlet？或者是reactive？那么spring boot是如何进行判断的呢？</p>
@@ -234,8 +234,8 @@ spring boot中使用WebServerStartStopLifecycle来管理WebServer的生命周期
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html" class="btn btn-neutral float-left" title="对于Aop的解析原理和@Transactional注解解析原理" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html" class="btn btn-neutral float-right" title="DispatcherHandler分析与Gateway实现" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html" class="btn btn-neutral float-left" title="分析一下 SpringBoot 的 Aop 的解析和 @Transactional 注解解析原理" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html" class="btn btn-neutral float-right" title="DispatcherHandler 分析与 Gateway 实现" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
