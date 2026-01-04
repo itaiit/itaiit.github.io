@@ -36,6 +36,10 @@ html_css_files = [
     'custom.css',
 ]
 
+html_theme_options = {
+    'sticky_navigation': True
+}
+
 source_suffix = {
     ".rst": "restructuredtext",
     ".md": "markdown",

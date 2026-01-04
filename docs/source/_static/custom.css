@@ -1,12 +1,6 @@
 /* _static/custom.css */
 
-/* 调整内容区域的最大宽度 */
-:root {
-    /* 可选：调整侧边栏宽度（默认 14rem） */
-    --sidebar-width: 16rem;
-    --font-stack: -apple-system, 'Rubik', BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
+body {
+    font-family: -apple-system, 'Rubik', BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
 }
-/* .page-content {
-    max-width: var(--content-max-width, 62em);
-} */
 
