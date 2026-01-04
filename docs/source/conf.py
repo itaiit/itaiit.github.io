@@ -42,7 +42,7 @@ html_theme_options = {
     'sticky_navigation': True,           # 滚动时固定导航
     'navigation_depth': 4,               # 侧边栏显示的层级深度
     'titles_only': False,                # 仅显示页面标题（设为 False 显示子标题）
-    'includehidden': False
+    'includehidden': True
 }
 
 source_suffix = {

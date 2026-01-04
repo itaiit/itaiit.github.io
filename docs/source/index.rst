@@ -12,5 +12,6 @@ Notebook documentation
 
 .. toctree::
    :maxdepth: 1
+   :hidden:
 
    springboot/index
