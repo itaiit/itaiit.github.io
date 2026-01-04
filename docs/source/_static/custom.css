@@ -1,6 +1,35 @@
-/* _static/custom.css */
 
-body {
-    font-family: -apple-system, 'Rubik', BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
+@font-face {
+    font-family: "JetBrains Mono";
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    src: url("fonts/JetBrainsMono-Regular.woff2");
+}
+@font-face {
+    font-family: "JetBrains Mono";
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+    src: url("fonts/JetBrainsMono-Medium.woff2");
+}
+@font-face {
+    font-family: "JetBrains Mono";
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    src: url("fonts/JetBrainsMono-Bold.woff2");
+}
+@font-face {
+    font-family: "Montserrat";
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    src: url("fonts/Montserrat-Bold.woff2");
 }
 
+:root {
+    --system-font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --header-font-family: "Montserrat", var(--system-font-family);
+    --monospace-font-family: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, Courier, monospace;
+}

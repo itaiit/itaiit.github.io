@@ -10,6 +10,7 @@ project = "ITAIIT's Notebook"
 copyright = '2025, itaiit'
 author = 'itaiit'
 release = '0.1'
+language = 'zh_CN'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -37,7 +38,11 @@ html_css_files = [
 ]
 
 html_theme_options = {
-    'sticky_navigation': True
+    'collapse_navigation': False,        # 是否默认折叠侧边栏
+    'sticky_navigation': True,           # 滚动时固定导航
+    'navigation_depth': 4,               # 侧边栏显示的层级深度
+    'titles_only': False,                # 仅显示页面标题（设为 False 显示子标题）
+    'includehidden': False
 }
 
 source_suffix = {
