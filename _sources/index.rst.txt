@@ -11,7 +11,6 @@ Notebook documentation
    This project is under active development.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    springboot/index
-
