@@ -11,7 +11,8 @@ Notebook documentation
    This project is under active development.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :hidden:
 
    springboot/index
+   designpattern/index
