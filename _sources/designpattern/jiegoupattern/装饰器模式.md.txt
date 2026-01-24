@@ -1,0 +1,125 @@
+# 装饰器模式
+
+装饰器模式的核心思想是：**在不修改原有对象的前提下，动态地给对象添加新的功能或行为**。
+
+类的层级结构：
+
+```latex
+Component（组件接口）
+│
+├── ConcreteComponent（具体组件，如：原味咖啡）
+│
+└── Decorator（装饰器基类，持有 Component 引用）
+     │
+     ├── ConcreteDecoratorA（具体装饰器，如：加牛奶）
+     └── ConcreteDecoratorB（具体装饰器，如：加糖）
+```
+
+我们可以看到装饰器的基类也实现了组件 Component 接口，因为我们想像调用组件一样来调用装饰器类，这个时候就要保证装饰器中和组件中具有相同的方法，此时通过组件接口来统一进行定义就再合适不过了。
+
+我们在使用装饰器模式的时候，如果有上面的类继承结构，调用的时候可以这样调用：
+
+```java
+new ConcreteDecoratorB(new ConcreteDecoratorA(new ConcreteComponent())); // 加糖加牛奶的咖啡
+```
+
+思考：直接将装饰器中的逻辑，抽象到组件接口中去可以吗，这样就不需要装饰器类？
+
+这样做不合理，最直观的是当我们新增了一个新的“具体组件”的时候，那么这些方法需要重新实现一边，比如加牛奶的逻辑，需要在 ConcreteComponentA 和 ConcreteComponentB 中都写一遍逻辑，无法进行复用。当我们需要修改添加牛奶的内部逻辑的时候，需要修改所有“具体组件”中 `addMilk()` 方法的逻辑。
+
+在使用场景中，例如可以通过装饰器模式，增加限流适配器和日志适配器，来添加限流、日志记录的功能。
+
+## 应用场景举例
+
+举个例子：我们给“调用第三方短信服务（如阿里云短信）”这个功能添加限流功能。
+
+假如 sdk 中阿里云短信的实现是这样的代码：
+
+```java
+// 阿里云官方 SDK 提供的类（你无法修改源码！）
+public class AliyunSmsClient {
+    public SendSmsResponse sendSms(SendSmsRequest request) {
+        // 内部调用 HTTP API，发送短信
+        // 注意：这个类不是接口，也没有实现你的任何接口！
+    }
+}
+```
+
+我们可以直接来使用装饰器模式吗？貌似不行，因为我们没有接口....如果把 AliyunSmsClient 当作是具体组件的话，很明显我们没有接口。
+
+我们想实现这样的功能：
+
+```java
+public interface SmsService {
+    void send(String phone, String message);
+}
+```
+
+限流装饰器：
+
+```java
+import com.google.common.util.concurrent.RateLimiter;
+
+public class RateLimitedSmsService implements SmsService {
+    private final SmsService target;          // 被装饰的对象（可以是 Adapter）
+    private final RateLimiter rateLimiter;    // 使用 Guava 的令牌桶限流器
+
+    public RateLimitedSmsService(SmsService target, double permitsPerSecond) {
+        this.target = target;
+        this.rateLimiter = RateLimiter.create(permitsPerSecond); // 每秒允许的请求数
+    }
+
+    @Override
+    public void send(String phone, String message) {
+        // 获取令牌（如果拿不到就阻塞或抛异常）
+        if (!rateLimiter.tryAcquire()) {
+            throw new RuntimeException("短信发送频率过高，请稍后再试");
+        }
+        target.send(phone, message); // 委托给真实实现
+    }
+}
+```
+
+我们想在限流装饰器中，通过 `target.send` 去实际执行 `AliyunSmsClient.sendSms`，这如何实现？
+
+适配器模式，答案是使用适配器模式，通过适配器模式，用组合的方式在我们的代码中去执行第三方 sdk 的逻辑：
+
+```java
+public class AliyunSmsAdapter implements SmsService {
+    private final AliyunSmsClient aliyunClient;
+
+    public AliyunSmsAdapter(AliyunSmsClient client) {
+        this.aliyunClient = client;
+    }
+
+    @Override
+    public void send(String phone, String message) {
+        // 将你的参数转换为阿里云 SDK 所需的格式
+        SendSmsRequest request = new SendSmsRequest();
+        request.setPhoneNumbers(phone);
+        request.setSignName("你的签名");
+        request.setTemplateCode("SMS_XXXXXX");
+        request.setTemplateParam("{\"code\":\"" + message + "\"}");
+
+        aliyunClient.sendSms(request); // 调用第三方
+    }
+}
+```
+
+这就是我们的适配器，然后我们就可以创建一个被限流装饰过的发短信的服务：
+
+```java
+SmsService smsService = new RateLimitedSmsService(new AliyunSmsAdapter(new AliyunSmsClient()), 5.0);
+smsService.send();
+```
+
+在这个场景中使用到了适配器，但这个适配和我们将自己的 servlet 嵌入到 tomcat 的执行流程中不同。
+
+- 我们需要适配去调用 sdk 中的方法，我们提供接口定义和实现；
+- 需要把我们的逻辑嵌入到 SDK 的执行流程中，我们只需要提供实现接口的适配器类即可；
+
+总结就是：适配器接口由调用方来提供。
+
+## 总结
+
+通过上面的示例**：我们在设计一个系统功能的时候，往往不能局限于使用一种设计模式就能实现这个功能，也许是先通过一个设计模式使我们的代码先达到了一个层次，达到了另一种设计模式的使用条件，然后再用另一种设计模式走下面的路**。我认为这才是困难的地方，需要熟练掌握不同设计模式组合使用、先使用哪个和后使用哪个都会有不同的效果，甚至组合使用设计模式的先后顺序也很重要。在设计的时候能多向下考虑两步三步会很有益。

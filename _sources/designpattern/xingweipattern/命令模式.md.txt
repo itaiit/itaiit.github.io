@@ -1,0 +1,121 @@
+# 命令模式
+
+命令模式的描述是：**一个请求封装为一个对象**，从而可用不同的请求对客户进行参数化；对请求排队或者记录请求日志，以及支持可撤销的操作。命令模式是一种对象行为型模式，其别名为动作（Action）模式或事务（Transaction）模式。
+
+在命令模式中，调用流程可以归纳为：请求发送者 -> 命令对象（进行抽象） -> 请求接收者。
+
+在命令模式中会将命令对象进行抽象，从而使不同的命令可以有统一的行为（也就是这些实现类有统一的方法）；每一种具体的命令对象的实现维护着对应的请求接收者（也就是真实处理业务逻辑的对象）的引用。
+
+## 代码示例
+
+例如在餐厅，我们可以给服务员说帮我擦一下这个桌子；然后给服务员说我想要一份宫保鸡丁饭；这里把服务员看做是请求发送者，擦一下桌子和点一份宫保鸡丁使我们发送的两个命令，下面来设计代码：
+
+请求发送者：
+
+```java
+/**
+ * 请求发送者
+ */
+public class Waiter {
+
+    private Command command;
+
+    public Waiter(Command command) {
+        this.command = command;
+    }
+
+    public void call() {
+        command.execute();
+    }
+}
+```
+
+定义抽象命令类：
+
+```java
+public abstract class Command {
+    public abstract void execute();
+}
+```
+
+定义实现类：
+
+```java
+/**
+ * 保洁
+ */
+public class Cleaner extends Command {
+    @Override
+    public void execute() {
+        System.out.println("擦干净桌子了......");
+    }
+}
+
+/**
+ * 厨师
+ */
+public class Cooker extends Command {
+    private String name;
+
+    public Cooker(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void execute() {
+        System.out.printf("开始制作：%s\n", this.name);
+    }
+}
+```
+
+我们走进餐馆：
+
+```java
+public class PatternApp implements ApplicationRunner {
+    public static void main(String[] args) {
+        Waiter waiter1 = new Waiter(new Cooker("宫保鸡丁"));
+        waiter1.call();
+
+        Waiter waiter2 = new Waiter(new Cleaner());
+        waiter2.call();
+    }
+```
+
+输出：
+
+```latex
+开始制作：宫保鸡丁
+擦干净桌子了......
+```
+
+在上面的设计中，比如我们现在要结账了，可以在创建一个结账的 Command，相当于是告诉服务员要结账了，此时我们创建一个实现类：Biller
+
+```java
+public class Biller extends Command {
+    @Override
+    public void execute() {
+        System.out.println("结账......");
+    }
+}
+
+
+Waiter waiter3 = new Waiter(new Biller());
+waiter3.call();
+```
+
+通过上面的示例，观察到在请求发送者调用方法执行的时候，并没有传递参数，其实这是命令模式设计的关键之一。***请求的参数并不是在调用 execute() 方法时传递的，而是在创建命令对象（即“封装请求”）的时候就通过构造函数或 setter 方法传入并保存起来的。***
+
+在这个设计关键中，可以比较容易的了解到在命令模式描述中的那一句话“一个请求封装为一个对象”，其实是通过请求中的信息构造出一个完整的命令对象（通常是作为命令对象的成员属性），这样的话命令对象中包含着执行这条命令所需的所有的参数。在上面的例子中，做菜命令需要知道做什么菜，就在构造命令的时候传递一个“宫保鸡丁”给 name。
+
+
+
+------
+
+命令模式的优缺点：
+
+
+
+| 命令模式的优点                                               | 命令模式的缺点                                               |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 解耦调用者与接收者：调用者无需知道接收者的具体类型或如何执行操作。易于扩展：新增命令只需实现 Command 接口，符合开闭原则。支持撤销/重做：可在命令中添加 undo() 方法，并配合历史栈实现。支持命令组合：可以将多个命令组合成宏命令（Macro Command）。支持队列和日志：命令对象可被序列化、排队、延迟执行或记录日志。 | 类数量增加：每个命令都需要一个具体类，可能导致类爆炸（尤其在命令种类多时）。复杂性提升：对于简单场景，使用命令模式可能显得过度设计。 |
+

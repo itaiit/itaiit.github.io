@@ -1,0 +1,336 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>命令模式 &mdash; ITAIIT&#39;s Notebook</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=409871d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=7c91f8fd"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=beaddf03"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="next" title="策略模式" href="%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F.html" />
+    <link rel="prev" title="职责链模式" href="%E8%81%8C%E8%B4%A3%E9%93%BE%E6%A8%A1%E5%BC%8F.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ITAIIT's Notebook
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="搜索文档" aria-label="搜索文档" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="导航菜单">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../springboot/index.html">SpringBoot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../springboot/%E5%B7%A5%E5%85%B7%E7%B1%BB-PropertyMapper.html">介绍工具类 PropertyMapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../springboot/embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html">分析 SpringBoot 中的 embed tomcat 加载流程</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#tomcat">启动一个Tomcat的示例代码</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#spring-boottomcat">Spring Boot中tomcat的创建过程</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html">分析一下 SpringBoot 的 Aop 的解析和 &#64;Transactional 注解解析原理</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#annotationawareaspectjautoproxycreator">AnnotationAwareAspectJAutoProxyCreator解析</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#postprocessafterinitialization">postProcessAfterInitialization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#id1">查找匹配的切面</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#id2">创建代理对象</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#id3">收到请求后执行代理逻辑</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#transactional">单机事务&#64;Transactional注解</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#aop">实战自定义AOP逻辑</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#spring-aop-api">Spring AOP API的支持</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#advisor-api">Advisor API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#id4">补充</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#id5">核心 AOP 概念</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html">Web 服务器的启动流程分析</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#web-servlet-reactive">如何判断创建哪种web容器：servlet？reactive？</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#webservermanager">初始化WebServerManager</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#reactivewebserverfactory">从容器中获取ReactiveWebServerFactory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#httphandler">从容器中获取HttpHandler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#id1">创建WebServerManager</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#webserver">创建webServer</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#nettywebserver">启动NettyWebServer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#id2">总结</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#id3">补充知识</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#webhandlerhttphandler">WebHandler和HttpHandler的对比</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html">DispatcherHandler 分析与 Gateway 实现</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#dispatcherhandler">DispatcherHandler处理请求</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#ping">从ping请求看方法调用</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#handlermappinghandler">HandlerMapping匹配获得Handler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#handleradapter">HandlerAdapter处理执行请求</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#handlerresulthandler">HandlerResultHandler处理请求结果</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#gateway">Gateway中拓展实现</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#id1">总结</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../springboot/%E6%97%A5%E5%BF%97Logger.html">日志 Logger-JCL, Slf4j</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E6%97%A5%E5%BF%97Logger.html#apache-comming-logging-jcl">Apache Comming Logging(JCL)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E6%97%A5%E5%BF%97Logger.html#slf4j-simple-logging-facade-for-java-slf4j">Slf4j是什么？英文叫做：Simple Logging Facade for Java (SLF4J)。</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E6%97%A5%E5%BF%97Logger.html#spring-boot">在spring boot中自定义日志框架的配置</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E6%97%A5%E5%BF%97Logger.html#commons-loggingslf4j">Commons Logging与Slf4j的对比</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">设计模式</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../jiegoupattern/index.html">结构型</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../jiegoupattern/%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F.html">适配器模式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../jiegoupattern/%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F.html">桥接模式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../jiegoupattern/%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F.html">组合模式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../jiegoupattern/%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F.html">装饰器模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../jiegoupattern/%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F.html#id2">应用场景举例</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jiegoupattern/%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F.html#id3">总结</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../jiegoupattern/%E5%A4%96%E8%A7%82%E6%A8%A1%E5%BC%8F.html">外观模式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../jiegoupattern/%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F.html">享元模式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../jiegoupattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F.html">代理模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../jiegoupattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F.html#id2">静态代理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jiegoupattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F.html#id3">动态代理</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../jiegoupattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F.html#jdk">JDK动态代理</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../jiegoupattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F.html#cglib">CGLib动态代理</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../jiegoupattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F.html#id4">示例：</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../jiegoupattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F.html#id5">二者的区别</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">行为型</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="%E8%81%8C%E8%B4%A3%E9%93%BE%E6%A8%A1%E5%BC%8F.html">职责链模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="%E8%81%8C%E8%B4%A3%E9%93%BE%E6%A8%A1%E5%BC%8F.html#id2">典型应用</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">命令模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">代码示例</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F.html">策略模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F.html#id2">示例代码</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F.html">观察者模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F.html#id2">示例代码</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F.html">迭代器模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F.html#id2">示例代码</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="移动版导航菜单" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ITAIIT's Notebook</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="页面导航">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">设计模式</a></li>
+          <li class="breadcrumb-item"><a href="index.html">行为型</a></li>
+      <li class="breadcrumb-item active">命令模式</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/designpattern/xingweipattern/命令模式.md.txt" rel="nofollow"> 查看页面源码</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>命令模式<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p>命令模式的描述是：<strong>一个请求封装为一个对象</strong>，从而可用不同的请求对客户进行参数化；对请求排队或者记录请求日志，以及支持可撤销的操作。命令模式是一种对象行为型模式，其别名为动作（Action）模式或事务（Transaction）模式。</p>
+<p>在命令模式中，调用流程可以归纳为：请求发送者 -&gt; 命令对象（进行抽象） -&gt; 请求接收者。</p>
+<p>在命令模式中会将命令对象进行抽象，从而使不同的命令可以有统一的行为（也就是这些实现类有统一的方法）；每一种具体的命令对象的实现维护着对应的请求接收者（也就是真实处理业务逻辑的对象）的引用。</p>
+<section id="id2">
+<h2>代码示例<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p>例如在餐厅，我们可以给服务员说帮我擦一下这个桌子；然后给服务员说我想要一份宫保鸡丁饭；这里把服务员看做是请求发送者，擦一下桌子和点一份宫保鸡丁使我们发送的两个命令，下面来设计代码：</p>
+<p>请求发送者：</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * 请求发送者</span>
+<span class="cm"> */</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Waiter</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="n">command</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">Waiter</span><span class="p">(</span><span class="n">Command</span><span class="w"> </span><span class="n">command</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">command</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">command</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">call</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">command</span><span class="p">.</span><span class="na">execute</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>定义抽象命令类：</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span><span class="w"> </span><span class="kd">abstract</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Command</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">abstract</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">execute</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>定义实现类：</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * 保洁</span>
+<span class="cm"> */</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Cleaner</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">execute</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;擦干净桌子了......&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * 厨师</span>
+<span class="cm"> */</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Cooker</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">Cooker</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">execute</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">printf</span><span class="p">(</span><span class="s">&quot;开始制作：%s\n&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">name</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>我们走进餐馆：</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">PatternApp</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ApplicationRunner</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Waiter</span><span class="w"> </span><span class="n">waiter1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Waiter</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Cooker</span><span class="p">(</span><span class="s">&quot;宫保鸡丁&quot;</span><span class="p">));</span>
+<span class="w">        </span><span class="n">waiter1</span><span class="p">.</span><span class="na">call</span><span class="p">();</span>
+
+<span class="w">        </span><span class="n">Waiter</span><span class="w"> </span><span class="n">waiter2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Waiter</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Cleaner</span><span class="p">());</span>
+<span class="w">        </span><span class="n">waiter2</span><span class="p">.</span><span class="na">call</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>输出：</p>
+<div class="highlight-latex notranslate"><div class="highlight"><pre><span></span>开始制作：宫保鸡丁
+擦干净桌子了......
+</pre></div>
+</div>
+<p>在上面的设计中，比如我们现在要结账了，可以在创建一个结账的 Command，相当于是告诉服务员要结账了，此时我们创建一个实现类：Biller</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Biller</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">execute</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;结账......&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="n">Waiter</span><span class="w"> </span><span class="n">waiter3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Waiter</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Biller</span><span class="p">());</span>
+<span class="n">waiter3</span><span class="p">.</span><span class="na">call</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>通过上面的示例，观察到在请求发送者调用方法执行的时候，并没有传递参数，其实这是命令模式设计的关键之一。<em><strong>请求的参数并不是在调用 execute() 方法时传递的，而是在创建命令对象（即“封装请求”）的时候就通过构造函数或 setter 方法传入并保存起来的。</strong></em></p>
+<p>在这个设计关键中，可以比较容易的了解到在命令模式描述中的那一句话“一个请求封装为一个对象”，其实是通过请求中的信息构造出一个完整的命令对象（通常是作为命令对象的成员属性），这样的话命令对象中包含着执行这条命令所需的所有的参数。在上面的例子中，做菜命令需要知道做什么菜，就在构造命令的时候传递一个“宫保鸡丁”给 name。</p>
+<hr class="docutils" />
+<p>命令模式的优缺点：</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>命令模式的优点</p></th>
+<th class="head"><p>命令模式的缺点</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>解耦调用者与接收者：调用者无需知道接收者的具体类型或如何执行操作。易于扩展：新增命令只需实现 Command 接口，符合开闭原则。支持撤销/重做：可在命令中添加 undo() 方法，并配合历史栈实现。支持命令组合：可以将多个命令组合成宏命令（Macro Command）。支持队列和日志：命令对象可被序列化、排队、延迟执行或记录日志。</p></td>
+<td><p>类数量增加：每个命令都需要一个具体类，可能导致类爆炸（尤其在命令种类多时）。复杂性提升：对于简单场景，使用命令模式可能显得过度设计。</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="页脚">
+        <a href="%E8%81%8C%E8%B4%A3%E9%93%BE%E6%A8%A1%E5%BC%8F.html" class="btn btn-neutral float-left" title="职责链模式" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> 上一页</a>
+        <a href="%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F.html" class="btn btn-neutral float-right" title="策略模式" accesskey="n" rel="next">下一页 <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; 版权所有 2025, itaiit。</p>
+  </div>
+
+  利用 <a href="https://www.sphinx-doc.org/">Sphinx</a> 构建，使用的 
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">主题</a>
+    由 <a href="https://readthedocs.org">Read the Docs</a> 开发.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

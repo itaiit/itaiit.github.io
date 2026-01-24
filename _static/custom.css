@@ -33,3 +33,11 @@
     --header-font-family: "Montserrat", var(--system-font-family);
     --monospace-font-family: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, Courier, monospace;
 }
+
+.wy-table-responsive table td,
+.wy-table-responsive table th {
+    white-space: normal !important;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}

@@ -1,0 +1,19 @@
+# 外观模式
+
+这个模式感觉没啥说的，就是将零散的多个步骤的调用，再抽出到一个方法中去，这样不用调用之前多个方法，而只需要调用这一个方法就可以了。
+
+`SpringApplication.run(Main.class, args)` 这就是一个外观，内部封装了：环境准备、Bean 加载、Web 容器启动、日志初始化等复杂流程。
+
+比如说一个下单流程：
+
+```java
+// 客户端调用
+OrderFacade.createOrder(userId, items);
+
+// 外观内部协调：
+// 1. 调用 UserService 验证用户
+// 2. 调用 InventoryService 扣减库存
+// 3. 调用 OrderService 创建订单
+// 4. 调用 NotificationService 发通知
+```
+

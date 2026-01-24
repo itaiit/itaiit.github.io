@@ -1,0 +1,85 @@
+# 策略模式
+
+策略模式在类的结构上面和命令模式相似。
+
+| 策略模式 | 用于在运行时选择算法或行为的实现方式。它关注的是“怎么做”——即同一任务可以有多种实现策略，客户端可以在运行时切换策略。 |
+| -------- | ------------------------------------------------------------ |
+| 命令模式 | 用于将请求封装为对象，从而支持参数化、排队、记录日志、撤销/重做等操作。它关注的是“做什么”——把一个动作（方法调用）抽象成一个对象。 |
+
+策略模式往往使用在**当同一个功能有多种实现方式可以选择的时候**，可以使用策略模式。而命令模式则不同，命令模式中每一个命令对象就是一个功能。
+
+策略模式的典型使用场景：
+
+- 排序算法可切换（如快速排序 vs 归并排序）
+- 支付方式选择（支付宝、微信、银行卡）
+- 税费计算策略（不同地区不同税率）
+
+## 示例代码
+
+我们直接看一下 spring boot 中用户缓存管理的抽象接口 `CacheManager`。我们有多种用于缓存管理的方式，可以使用 ConcurrentHashMap、使用 Caffeine、使用 Redis 等等。每一种缓存结构都是一种缓存管理策略。我们可以这样使用：
+
+```java
+@Slf4j
+@SpringBootApplication
+public class HelloApp implements ApplicationRunner {
+
+    @Autowired
+    private CacheManager cacheManager;
+
+    public static void main(String[] args) {
+        SpringApplication.run(HelloApp.class, args);
+    }
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        Cache names = cacheManager.getCache("names");
+        names.put("nk", "name key");
+
+        Collection<String> cacheNames = cacheManager.getCacheNames();
+        log.info("cache names is {}", cacheNames);
+
+        log.info("get value from cache: {}", names.get("nk"));
+
+        log.info("evict cache nk: {}", names.evictIfPresent("nk"));
+    }
+}
+```
+
+通过 spring boot 的自动配置，我们可以灵活的切换使用哪种缓存管理策略，这里我们先使用 `ConcurrentMapCacheManager` 来管理缓存：
+
+```java
+@Configuration
+public class CacheConfig {
+    @Bean
+    public CacheManager cacheManager() {
+        return new ConcurrentMapCacheManager();
+    }
+}
+```
+
+通过策略模式我们可以很容易的将上述的缓存替换为 Caffeine：
+
+- 添加 caffeine 依赖：
+
+```xml
+<dependency>
+    <groupId>com.github.ben-manes.caffeine</groupId>
+    <artifactId>caffeine</artifactId>
+</dependency>
+```
+
+- 自动配置 Caffeine 缓存：
+
+```java
+@Bean
+public CacheManager cacheManager() {
+    CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
+    Caffeine<Object, Object> caffeine = Caffeine.newBuilder().removalListener(new RemovalListener<Object, Object>() {
+        @Override
+        public void onRemoval(@Nullable Object key, @Nullable Object value, RemovalCause cause) {
+            log.info("on removal: key:{}, value:{}", key, value);
+        }
+    });
+    caffeineCacheManager.setCaffeine(caffeine);
+    return caffeineCacheManager;
+}
+```

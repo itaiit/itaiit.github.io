@@ -1,0 +1,381 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>代理模式 &mdash; ITAIIT&#39;s Notebook</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=409871d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=7c91f8fd"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=beaddf03"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+    <link rel="next" title="行为型" href="../xingweipattern/index.html" />
+    <link rel="prev" title="享元模式" href="%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ITAIIT's Notebook
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="搜索文档" aria-label="搜索文档" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="导航菜单">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../springboot/index.html">SpringBoot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../springboot/%E5%B7%A5%E5%85%B7%E7%B1%BB-PropertyMapper.html">介绍工具类 PropertyMapper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../springboot/embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html">分析 SpringBoot 中的 embed tomcat 加载流程</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#tomcat">启动一个Tomcat的示例代码</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/embed%20tomcat%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#spring-boottomcat">Spring Boot中tomcat的创建过程</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html">分析一下 SpringBoot 的 Aop 的解析和 &#64;Transactional 注解解析原理</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#annotationawareaspectjautoproxycreator">AnnotationAwareAspectJAutoProxyCreator解析</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#postprocessafterinitialization">postProcessAfterInitialization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#id1">查找匹配的切面</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#id2">创建代理对象</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#id3">收到请求后执行代理逻辑</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#transactional">单机事务&#64;Transactional注解</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#aop">实战自定义AOP逻辑</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#spring-aop-api">Spring AOP API的支持</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#advisor-api">Advisor API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#id4">补充</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E5%AF%B9%E4%BA%8EAop%E7%9A%84%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86%E5%92%8C%40Transactional%E6%B3%A8%E8%A7%A3%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86.html#id5">核心 AOP 概念</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html">Web 服务器的启动流程分析</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#web-servlet-reactive">如何判断创建哪种web容器：servlet？reactive？</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#webservermanager">初始化WebServerManager</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#reactivewebserverfactory">从容器中获取ReactiveWebServerFactory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#httphandler">从容器中获取HttpHandler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#id1">创建WebServerManager</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#webserver">创建webServer</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#nettywebserver">启动NettyWebServer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#id2">总结</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#id3">补充知识</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90.html#webhandlerhttphandler">WebHandler和HttpHandler的对比</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html">DispatcherHandler 分析与 Gateway 实现</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#dispatcherhandler">DispatcherHandler处理请求</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#ping">从ping请求看方法调用</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#handlermappinghandler">HandlerMapping匹配获得Handler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#handleradapter">HandlerAdapter处理执行请求</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#handlerresulthandler">HandlerResultHandler处理请求结果</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#gateway">Gateway中拓展实现</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/DispatcherHandler%E5%88%86%E6%9E%90%E4%B8%8EGateway%E5%AE%9E%E7%8E%B0.html#id1">总结</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../springboot/%E6%97%A5%E5%BF%97Logger.html">日志 Logger-JCL, Slf4j</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E6%97%A5%E5%BF%97Logger.html#apache-comming-logging-jcl">Apache Comming Logging(JCL)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../springboot/%E6%97%A5%E5%BF%97Logger.html#slf4j-simple-logging-facade-for-java-slf4j">Slf4j是什么？英文叫做：Simple Logging Facade for Java (SLF4J)。</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E6%97%A5%E5%BF%97Logger.html#spring-boot">在spring boot中自定义日志框架的配置</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../springboot/%E6%97%A5%E5%BF%97Logger.html#commons-loggingslf4j">Commons Logging与Slf4j的对比</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">设计模式</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">结构型</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F.html">适配器模式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F.html">桥接模式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F.html">组合模式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F.html">装饰器模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F.html#id2">应用场景举例</a></li>
+<li class="toctree-l4"><a class="reference internal" href="%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F.html#id3">总结</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="%E5%A4%96%E8%A7%82%E6%A8%A1%E5%BC%8F.html">外观模式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F.html">享元模式</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">代理模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">静态代理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">动态代理</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#jdk">JDK动态代理</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#cglib">CGLib动态代理</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#id4">示例：</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">二者的区别</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../xingweipattern/index.html">行为型</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../xingweipattern/%E8%81%8C%E8%B4%A3%E9%93%BE%E6%A8%A1%E5%BC%8F.html">职责链模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../xingweipattern/%E8%81%8C%E8%B4%A3%E9%93%BE%E6%A8%A1%E5%BC%8F.html#id2">典型应用</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../xingweipattern/%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F.html">命令模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../xingweipattern/%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F.html#id2">代码示例</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../xingweipattern/%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F.html">策略模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../xingweipattern/%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F.html#id2">示例代码</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../xingweipattern/%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F.html">观察者模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../xingweipattern/%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F.html#id2">示例代码</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../xingweipattern/%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F.html">迭代器模式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../xingweipattern/%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F.html#id2">示例代码</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="移动版导航菜单" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ITAIIT's Notebook</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="页面导航">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">设计模式</a></li>
+          <li class="breadcrumb-item"><a href="index.html">结构型</a></li>
+      <li class="breadcrumb-item active">代理模式</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/designpattern/jiegoupattern/代理模式.md.txt" rel="nofollow"> 查看页面源码</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>代理模式<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p>首先想到的第一个疑问就是：代理模式和装饰器模式的区别是什么？一个判断的标准是：<strong>代理模式关注“控制访问”，装饰器模式关注“扩展功能”</strong>。</p>
+<p>根据代理类的创建时机不同，代理又分为静态代理和动态代理。在静态代理中，代理类所实现的接口和所代理的方法都已经固定了。而动态代理中的代理类是在程序运行的时候动态生成的。</p>
+<section id="id2">
+<h2>静态代理<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p>类比（经纪人，歌手），与客户之间的关系：<img alt="img" src="../../_images/1658748279828-d0029c44-8022-4ec4-9c60-1405022e4476.png" /></p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Client</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">RealStar</span><span class="w"> </span><span class="n">realStar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RealStar</span><span class="p">();</span>
+<span class="w">        </span><span class="n">ProxyStar</span><span class="w"> </span><span class="n">proxyStar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ProxyStar</span><span class="p">(</span><span class="n">realStar</span><span class="p">);</span>
+<span class="w">        </span><span class="n">proxyStar</span><span class="p">.</span><span class="na">sing</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>动态代理<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<section id="jdk">
+<h3>JDK动态代理<a class="headerlink" href="#jdk" title="Link to this heading"></a></h3>
+<p>代理对象和真实对象实现相同的接口；</p>
+<ol class="arabic simple">
+<li><p>定义StarHandler，实现java.lang.reflect.InvocationHandler：</p></li>
+</ol>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CusProxyHandler</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">InvocationHandler</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">ICusA</span><span class="w"> </span><span class="n">iCusA</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">CusProxyHandler</span><span class="p">(</span><span class="n">ICusA</span><span class="w"> </span><span class="n">iCusA</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">iCusA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iCusA</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/*</span>
+<span class="cm">     * proxy：是动态生成的代理对象</span>
+<span class="cm">     * */</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="nf">invoke</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">proxy</span><span class="p">,</span><span class="w"> </span><span class="n">Method</span><span class="w"> </span><span class="n">method</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Throwable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;proxy = &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">proxy</span><span class="p">.</span><span class="na">getClass</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;, method = &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">method</span><span class="p">);</span><span class="w"> </span><span class="c1">// proxy = class com.sun.proxy.$Proxy0, method = public abstract void io.itaiit.proxy.ICusB.method2()</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">proxy</span><span class="w"> </span><span class="k">instanceof</span><span class="w"> </span><span class="n">ICusA</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;is a iCusA&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">proxy</span><span class="w"> </span><span class="k">instanceof</span><span class="w"> </span><span class="n">ICusB</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;is a iCusB&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;before&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">method</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="n">iCusA</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;after&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li><p>动态生成代理：</p></li>
+</ol>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Demo07</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">B</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">B</span><span class="p">();</span>
+<span class="w">        </span><span class="n">CusProxyHandler</span><span class="w"> </span><span class="n">cusProxyHandler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CusProxyHandler</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+<span class="w">        </span><span class="n">ICusB</span><span class="w"> </span><span class="n">o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ICusB</span><span class="p">)</span><span class="w"> </span><span class="n">Proxy</span><span class="p">.</span><span class="na">newProxyInstance</span><span class="p">(</span><span class="n">B</span><span class="p">.</span><span class="na">class</span><span class="p">.</span><span class="na">getClassLoader</span><span class="p">(),</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Class</span><span class="o">[]</span><span class="p">{</span><span class="n">ICusA</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">ICusB</span><span class="p">.</span><span class="na">class</span><span class="p">},</span><span class="w"> </span><span class="n">cusProxyHandler</span><span class="p">);</span>
+
+<span class="c1">//        Class&lt;?&gt;[] interfaces = o.getClass().getInterfaces();</span>
+<span class="c1">//        System.out.println(Arrays.toString(interfaces));</span>
+
+<span class="c1">//        o.method2(); // 如果代理类强转为了ICusB，但是类B没有实现该接口（也就是代理类和被代理类没有实现相同的接口），调用method2的时候，会出现异常：Exception in thread &quot;main&quot; java.lang.IllegalArgumentException: object is not an instance of declaring class</span>
+
+<span class="w">        </span><span class="n">o</span><span class="p">.</span><span class="na">method2</span><span class="p">();</span>
+
+<span class="c1">//        o.toString();</span>
+
+<span class="w">    </span><span class="p">}</span>
+
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">B</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ICusA</span><span class="p">,</span><span class="n">ICusB</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">method1</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;B.method1&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">method2</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;B.method2&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><img alt="img" src="../../_images/1658748426397-ea97950c-7efb-425c-93a8-c5cf580fcbc9.png" /></p>
+</section>
+<section id="cglib">
+<h3>CGLib动态代理<a class="headerlink" href="#cglib" title="Link to this heading"></a></h3>
+<p>动态生成代理类的子类，并且重写被代理类的<strong>非final</strong>方法。</p>
+<p>需要注意的是：动态生成的代理类会代理A类和Object类的非final的方法，包括：toString，hashCode()，因此调用toString()的时候，除了调用父类的toString()之外，还会调用hashCode()方法。</p>
+<section id="id4">
+<h4>示例：<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * 会代理A类和Object类的非final的方法,包括: toString, hashCode()</span>
+<span class="cm"> */</span>
+<span class="kd">class</span> <span class="nc">A</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">A</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">sayHello</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;A.sayHello&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Enhancer</span><span class="w"> </span><span class="n">enhancer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Enhancer</span><span class="p">();</span>
+<span class="w">        </span><span class="n">enhancer</span><span class="p">.</span><span class="na">setSuperclass</span><span class="p">(</span><span class="n">A</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+<span class="w">        </span><span class="n">enhancer</span><span class="p">.</span><span class="na">setCallback</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">MethodInterceptor</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nd">@Override</span>
+<span class="w">            </span><span class="kd">public</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="nf">intercept</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">o</span><span class="p">,</span><span class="w"> </span><span class="n">Method</span><span class="w"> </span><span class="n">method</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">[]</span><span class="w"> </span><span class="n">objects</span><span class="p">,</span><span class="w"> </span><span class="n">MethodProxy</span><span class="w"> </span><span class="n">methodProxy</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Throwable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="c1">// 排除掉Object类中的方法, 不进行代理</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">method</span><span class="p">.</span><span class="na">getDeclaringClass</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Object</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="k">return</span><span class="w"> </span><span class="n">proxy</span><span class="p">.</span><span class="na">invokeSuper</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="p">);</span><span class="w"> </span><span class="c1">// 或直接 method.invoke(obj, args)</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;method = &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">method</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;, methodProxy = &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">methodProxy</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;, o = &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="na">getClass</span><span class="p">());</span>
+<span class="w">                </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;before&quot;</span><span class="p">);</span>
+<span class="w">                </span><span class="n">Object</span><span class="w"> </span><span class="n">o1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">methodProxy</span><span class="p">.</span><span class="na">invokeSuper</span><span class="p">(</span><span class="n">o</span><span class="p">,</span><span class="w"> </span><span class="n">objects</span><span class="p">);</span>
+<span class="w">                </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;o1 = &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">o1</span><span class="p">);</span>
+<span class="w">                </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;after&quot;</span><span class="p">);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">o1</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">});</span>
+<span class="w">        </span><span class="n">A</span><span class="w"> </span><span class="n">o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="w"> </span><span class="n">enhancer</span><span class="p">.</span><span class="na">create</span><span class="p">();</span>
+<span class="c1">//        o.toString();</span>
+<span class="w">        </span><span class="n">o</span><span class="p">.</span><span class="na">sayHello</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="cm">/*</span>
+<span class="cm">输出:</span>
+<span class="cm">    method = public void io.itaiit.A.sayHello(), methodProxy = net.sf.cglib.proxy.MethodProxy@7ab2bfe1, o = class io.itaiit.A$$EnhancerByCGLIB$$61f9c417</span>
+<span class="cm">    before</span>
+<span class="cm">    A.sayHello</span>
+<span class="cm">    o1 = null</span>
+<span class="cm">    after</span>
+<span class="cm">    */</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="id5">
+<h2>二者的区别<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>JDK动态代理使用反射机制；Cglib动态代理使用ASM，通过修改字节码来生成子类；</p></li>
+<li><p>JDK在创建动态代理对象的时候，性能高于CGLib；但是生成的代理对象在运行的时候，性能却比CGLib低；</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="页脚">
+        <a href="%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F.html" class="btn btn-neutral float-left" title="享元模式" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> 上一页</a>
+        <a href="../xingweipattern/index.html" class="btn btn-neutral float-right" title="行为型" accesskey="n" rel="next">下一页 <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; 版权所有 2025, itaiit。</p>
+  </div>
+
+  利用 <a href="https://www.sphinx-doc.org/">Sphinx</a> 构建，使用的 
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">主题</a>
+    由 <a href="https://readthedocs.org">Read the Docs</a> 开发.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

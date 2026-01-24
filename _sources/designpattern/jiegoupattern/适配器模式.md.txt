@@ -1,0 +1,27 @@
+# 适配器模式
+
+适配器模式的定义： **将一个类的接口转换成客户希望的另一个接口。适配器模式使得原本由于接口不兼容而不能一起工作的那些类可以一起工作**。
+
+考虑适配器的场景
+
+- 你有一个第三方库，它提供了 LegacyService.process(C c)
+- 但你的系统统一要求所有服务实现 MyService.method(B b)
+- 你不能改第三方代码，又想让 LegacyService 能被当作 MyService 使用
+
+此时实现适配器：
+
+```java
+class LegacyServiceAdapter implements MyService {
+    private LegacyService legacy = new LegacyService();
+
+    @Override
+    public void method(B b) {
+        C c = convertBtoC(b); // 适配参数
+        legacy.process(c);    // 调用不兼容的旧接口
+    }
+}
+```
+
+我们在 spring boot 中会使用内置的 embed tomcat 来作为 web 容器。其中 **DispatcherServlet** 就是一个典型的适配器。
+
+tomcat 只认识 servlet，想让 tomcat 把我们自己的逻辑也当成是 servlet，我们不能修改 tomcat 的源代码。这个时候使用适配器模式通过继承 servlet 就能实现这个效果，我们使用 spring 开发的程序就是一个大大的 servlet。

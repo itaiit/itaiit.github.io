@@ -1,0 +1,71 @@
+# 迭代器模式
+
+在迭代器中包含的角色有：抽象迭代器，具体迭代器（抽象迭代器的实现类）、抽象聚合类、具体聚合类（抽象聚合类的实现类）四种角色。
+
+在抽象聚合类中往往会包含一个获取迭代器的方法：
+
+```java
+public abstract Iterator<E> iterator();
+```
+
+在将迭代器和聚合类拆分的时候，在迭代器中往往会维持着聚合类的引用，这是因为需要在迭代器中访问集合数据来进行迭代操作。
+
+例如有聚合抽象类 `Aggregate` 以及一个实现类 `ConcreteAggregate` 类：
+
+```java
+public abstract class Aggregate {
+    public abstract Iterator<E> iterator();
+}
+```
+
+实现类 `ConcreteAggregate` 逻辑：
+
+```java
+public class ConcreteAggregate {
+    public Iterator<E> iterator() {
+        return ConcreteIterator(this); // 迭代器中持有聚合类的引用
+    }
+}
+```
+
+在上面的类结构中，我们在返回一个具体的迭代器的时候需要传递当前聚合类的引用；除此之外还有另一种方式，就是将具体迭代器类的定义作为聚合类的内部类，这样在迭代器中就能直接访问聚合类的属性了。
+
+## 示例代码
+
+我们来看 Java 中的抽象集合类 `AbstractCollection`，首先这个类中定义了返回迭代器的抽象方法：`public abstract Iterator<E> iterator();`。我们看一下这个集合具体的实现类：`ArrayList`。
+
+`ArrayList`中 iterator() 方法的实现：
+
+```java
+public Iterator<E> iterator() {
+    return new Itr();
+}
+```
+
+我们可以看到在这个实现方法中返回了一个 Itr 迭代器，这个迭代器是在 ArrayList 类内部定义的：
+
+```java
+private class Itr implements Iterator<E> {
+    int cursor;       // index of next element to return
+    int lastRet = -1; // index of last element returned; -1 if no such
+    int expectedModCount = modCount;
+
+    // prevent creating a synthetic constructor
+    Itr() {}
+    
+    public E next() {
+        checkForComodification();
+        int i = cursor;
+        if (i >= size)
+            throw new NoSuchElementException();
+        Object[] elementData = ArrayList.this.elementData;
+        if (i >= elementData.length)
+            throw new ConcurrentModificationException();
+        cursor = i + 1;
+        return (E) elementData[lastRet = i];
+    }
+    ......
+}
+```
+
+在迭代的方法中，可以很方便的通过 `ArrayList.this.elementData` 直接访问 ArrayList 中的对象数组。
